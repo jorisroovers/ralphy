@@ -14,6 +14,12 @@ function createWindow() {
     mainWindow = new BrowserWindow({width: 800, height: 600});
     mainWindow.loadURL(`file://${__dirname}/views/index.html`)
 
+    // We can access settings here like this:
+    // const storage = require('electron-json-storage');
+    // storage.get('settings.user', function (error, data) {
+    //     // console.log(data);
+    // });
+
 
     // Emitted when the window is closed.
     mainWindow.on('closed', function () {
