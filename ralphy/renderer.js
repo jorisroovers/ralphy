@@ -2,6 +2,7 @@ const ipcRenderer = window.require("electron").ipcRenderer;
 const fs = require('fs');
 const storage = require('electron-json-storage');
 const path = require('path');
+const chokidar = require('chokidar');
 
 
 // http://mozilla.github.io/pdf.js/examples/learning/helloworld.html
@@ -11,6 +12,9 @@ PDFJS.workerSrc = '../node_modules/pdfjs-dist/build/pdf.worker.js';
 
 
 angular.module('ralphy', ['ngRoute'])
+    .factory('Settings', function () {
+
+    })
     .config(function ($routeProvider) {
 
         $routeProvider
@@ -32,40 +36,65 @@ angular.module('ralphy', ['ngRoute'])
             ipcRenderer.send('toggle-dev-tools', 'ping');
         };
     })
-    .controller('TaggingController', ['$scope', function ($scope) {
+    .controller('TaggingController', ['$scope', '$q', function ($scope, $q) {
 
-        // var watchDirectory = "ADD DIRECTORY HERE";
-        // fs.watch(watchDirectory, function (event, filename) {
-        //     console.log('event is: ' + event);
-        //     if (filename) {
-        //         console.log('filename provided: ' + filename);
-        //     } else {
-        //         console.log('filename not provided');
-        //     }
-        // });
 
-        $scope.tags = [{displayName: "ING", tag: "ing"}, {displayName: "Breda", tag: "breda"}];
+        $scope.tags = [
+            {displayName: "CZ", tag: "cz"},
+            {displayName: "ING", tag: "ing"},
+            {displayName: "Breda", tag: "breda"}
+        ];
+
         $scope.activeFile = null;
+        var settings = {};
+
+        var init = function () {
+            var deferred = $q.defer();
+            storage.get('settings.user', function (error, data) {
+                settings = data;
+                deferred.resolve();
+            });
+            return deferred.promise;
+        };
 
         readFiles = function () {
-            storage.get('settings.user', function (error, data) {
-                $scope.watchDirectory = data.watchDirectory
-                files = fs.readdirSync(data.watchDirectory);
-                $scope.$apply(function () {
-                    // Only show pdf files (for now we just say a file is a PDF if it has the .pdf extension).
-                    $scope.files = files.filter(function (file) {
-                        return /\.pdf$/.test(file);
-                    });
+            files = fs.readdirSync(settings.watchDirectory);
+            // Only show pdf files (for now we just say a file is a PDF if it has the .pdf extension).
+            files = files.filter(function (file) {
+                return /\.pdf$/.test(file);
+            });
 
-                    // make the first file active if no file is active yet
-                    if ($scope.activeFile == null && $scope.files.length > 0) {
-                        $scope.activate($scope.files[0]);
+            files.sort(function (a, b) {
+                var fileAPath = path.join(settings.watchDirectory, a);
+                var fileBPath = path.join(settings.watchDirectory, b);
+                return fs.statSync(fileBPath).mtime.getTime() - fs.statSync(fileAPath).mtime.getTime();
+            });
+
+            $scope.files = files;
+
+            console.log($scope.activeFile);
+            // make the first file active if no file is active yet
+            if ($scope.files.length > 0) {
+                $scope.activate($scope.files[0]);
+            }
+        };
+
+        watchScansDirectory = function () {
+            var pdfGlob = path.join(settings.watchDirectory, "*.pdf");
+            var watcher = chokidar.watch(pdfGlob, {ignoreInitial: true});
+            watcher.on('all', function (event, file) {
+                $scope.$apply(function () {
+                    readFiles();
+                    // make sure the window is visible if this is a new scan
+                    if (event == "add") {
+                        ipcRenderer.send('show-main-window', 'ping');
                     }
                 });
             });
         };
-        readFiles();
 
+        // let's get the party started
+        init().then(readFiles).then(watchScansDirectory);
 
         $scope.changeName = function () {
             var newFilePath = path.join($scope.activeFile.dirPath, $scope.fileNameField);
@@ -85,11 +114,11 @@ angular.module('ralphy', ['ngRoute'])
         };
 
         $scope.activate = function (fileName) {
-            var filePath = path.join($scope.watchDirectory, fileName);
-            $scope.activeFile = {path: filePath, dirPath: $scope.watchDirectory, name: fileName};
+            var filePath = path.join(settings.watchDirectory, fileName);
+            $scope.activeFile = {path: filePath, dirPath: settings.watchDirectory, name: fileName};
             $scope.fileNameField = fileName;
             renderPdf($scope.activeFile.path)
-        }
+        };
 
         renderPdf = function (file) {
             var data = new Uint8Array(fs.readFileSync(file));
@@ -114,7 +143,8 @@ angular.module('ralphy', ['ngRoute'])
             });
         };
 
-    }])
+    }
+    ])
     .controller('SettingsController', ['$scope', '$timeout', function ($scope, $timeout) {
         // Use https://github.com/jviotti/electron-json-storage together with electron's remote
 
@@ -152,7 +182,6 @@ angular.module('ralphy', ['ngRoute'])
                     $scope.statusMessage = "";
                 }, 1000);
             });
-
 
         };
 
