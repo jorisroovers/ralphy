@@ -44,42 +44,74 @@ angular.module('ralphy', ['ngRoute'])
         //     }
         // });
 
-        storage.get('settings.user', function (error, data) {
-            $scope.watchDirectory = data.watchDirectory
-            files = fs.readdirSync(data.watchDirectory);
-            $scope.$apply(function () {
-                $scope.files = files;
-            });
-        });
+        $scope.tags = [{displayName: "ING", tag: "ing"}, {displayName: "Breda", tag: "breda"}];
+        $scope.activeFile = null;
 
-        $scope.renderPdf = function (fileName) {
-            console.log("rendering!");
-            // render PDF
-            var file = path.join($scope.watchDirectory, fileName);
-            if (file != "") {
-                var data = new Uint8Array(fs.readFileSync(file));
-                PDFJS.getDocument(data).then(function (pdfDocument) {
-                    console.log('Number of pages: ' + pdfDocument.numPages);
-
-                    pdfDocument.getPage(1).then(function getPageHelloWorld(page) {
-                        var scale = 1.5;
-                        var viewport = page.getViewport(scale);
-
-                        // Prepare canvas using PDF page dimensions
-                        var canvas = document.getElementById('pdf-canvas');
-                        var context = canvas.getContext('2d');
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
-
-                        // Render PDF page into canvas context
-                        var renderContext = {
-                            canvasContext: context,
-                            viewport: viewport
-                        };
-                        page.render(renderContext);
+        readFiles = function () {
+            storage.get('settings.user', function (error, data) {
+                $scope.watchDirectory = data.watchDirectory
+                files = fs.readdirSync(data.watchDirectory);
+                $scope.$apply(function () {
+                    // Only show pdf files (for now we just say a file is a PDF if it has the .pdf extension).
+                    $scope.files = files.filter(function (file) {
+                        return /\.pdf$/.test(file);
                     });
+
+                    // make the first file active if no file is active yet
+                    if ($scope.activeFile == null && $scope.files.length > 0) {
+                        $scope.activate($scope.files[0]);
+                    }
+                });
+            });
+        };
+        readFiles();
+
+
+        $scope.changeName = function () {
+            var newFilePath = path.join($scope.activeFile.dirPath, $scope.fileNameField);
+            console.log($scope.activeFile.path, "==>", newFilePath);
+            // only save when the new file path is actually different!
+            if ($scope.activeFile.path != newFilePath) {
+                fs.rename($scope.activeFile.path, newFilePath, function (err) {
+                    if (err) throw err;
+                    console.log("[RENAMED]", newFilePath);
+                    readFiles(); // reload files so that the list shows updated versions
                 });
             }
+        };
+
+        $scope.applyTag = function (tag) {
+            $scope.fileNameField = "[" + tag.tag + "] " + $scope.fileNameField;
+        };
+
+        $scope.activate = function (fileName) {
+            var filePath = path.join($scope.watchDirectory, fileName);
+            $scope.activeFile = {path: filePath, dirPath: $scope.watchDirectory, name: fileName};
+            $scope.fileNameField = fileName;
+            renderPdf($scope.activeFile.path)
+        }
+
+        renderPdf = function (file) {
+            var data = new Uint8Array(fs.readFileSync(file));
+            PDFJS.getDocument(data).then(function (pdfDocument) {
+                pdfDocument.getPage(1).then(function getPageHelloWorld(page) {
+                    var scale = 1.5;
+                    var viewport = page.getViewport(scale);
+
+                    // Prepare canvas using PDF page dimensions
+                    var canvas = document.getElementById('pdf-canvas');
+                    var context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    // Render PDF page into canvas context
+                    var renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    page.render(renderContext);
+                });
+            });
         };
 
     }])

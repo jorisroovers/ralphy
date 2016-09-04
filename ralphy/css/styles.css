@@ -30,11 +30,48 @@ body, html {
 }
 
 #view {
-    float: left;
     padding: 5px;
+}
+
+#active-filename {
+    display: block;
+    width: 700px;
+    height: 20px;
+    font-size: 18px;
+}
+
+#tags {
+    float: right
+}
+
+.tag {
+    display: inline;
+    background-color: orange;
+    padding: 3px 10px;
+    border-radius: 2px;
+    color: aliceblue;
+    margin: 5px;
+}
+
+.tag:hover {
+    cursor: pointer;
 }
 
 #pdf-canvas {
     width: 200px;
     height: 300px;
+    border: 1px solid;
+}
+
+/* Settings */
+
+.form-group {
+    margin: 2px 0;
+
+}
+
+label {
+    width: 150px;
+    text-align: right;
+    display: inline-block;
 }

@@ -2,4 +2,12 @@
 
 <canvas id="pdf-canvas"></canvas>
 
-<div ng-repeat="file in files"><a href="" ng-click="renderPdf(file)">{{file}}</a></div>
+<div id="tags">
+    <div class="tag" ng-repeat="tag in tags" ng-click="applyTag(tag)">{{tag.displayName}}</div>
+</div>
+
+<form ng-submit="changeName()">
+    <input id="active-filename" type="text" ng-model="fileNameField"/>
+    <button type="submit">Rename</button>
+</form>
+<div ng-repeat="file in files"><a href="" ng-click="activate(file)">{{file}}</a></div>
