@@ -1,6 +1,17 @@
 <h1>Ralphy</h1>
 
-<canvas id="pdf-canvas"></canvas>
+<div id="pdf-container">
+    <canvas id="pdf-canvas"></canvas>
+    <!--<div ng-show="activeFile.currentPage != activeFile.maxPage">-->
+    <i class="fa fa-2x fa-chevron-circle-left pdf-nav-button" aria-hidden="true"
+       ng-class="activeFile.currentPage == 1 && 'pdf-nav-button-disabled'"
+       ng-click="pdfPrevPage()"></i>
+
+    <i class="fa fa-2x fa-chevron-circle-right pdf-nav-button" aria-hidden="true"
+       ng-class="activeFile.currentPage == activeFile.pdfDocument.numPages && 'pdf-nav-button-disabled'"
+       ng-click="pdfNextPage()"></i>
+    <!--</div>-->
+</div>
 
 <div id="tags">
     <div class="tag" ng-repeat="tag in tags" ng-click="applyTag(tag)">{{tag.displayName}}</div>

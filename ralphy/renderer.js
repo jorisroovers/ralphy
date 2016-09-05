@@ -115,32 +115,73 @@ angular.module('ralphy', ['ngRoute'])
 
         $scope.activate = function (fileName) {
             var filePath = path.join(settings.watchDirectory, fileName);
-            $scope.activeFile = {path: filePath, dirPath: settings.watchDirectory, name: fileName};
+            $scope.activeFile = {
+                path: filePath,
+                dirPath: settings.watchDirectory,
+                name: fileName,
+                currentPage: 1,
+                pdfDocument: null
+            };
             $scope.fileNameField = fileName;
-            renderPdf($scope.activeFile.path)
+            renderPdf($scope.activeFile);
+        };
+
+        $scope.pdfNextPage = function () {
+            var newPage = Math.min($scope.activeFile.currentPage + 1, $scope.activeFile.pdfDocument.numPages);
+            // don't re-render the same page
+            if (newPage != $scope.activeFile.currentPage) {
+                $scope.activeFile.currentPage = newPage;
+                renderPdf($scope.activeFile);
+            }
+
+        };
+
+        $scope.pdfPrevPage = function () {
+            var newPage = Math.max($scope.activeFile.currentPage - 1, 1);
+            // don't re-render the same page
+            if (newPage != $scope.activeFile.currentPage) {
+                $scope.activeFile.currentPage = newPage;
+                renderPdf($scope.activeFile);
+            }
+        };
+
+
+        renderPdfDocument = function (pdfDocument, page) {
+            pdfDocument.getPage(page).then(function (page) {
+
+                var scale = 1.5;
+                var viewport = page.getViewport(scale);
+
+                // Prepare canvas using PDF page dimensions
+                var canvas = document.getElementById('pdf-canvas');
+                var context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                // Render PDF page into canvas context
+                var renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                page.render(renderContext);
+            });
         };
 
         renderPdf = function (file) {
-            var data = new Uint8Array(fs.readFileSync(file));
-            PDFJS.getDocument(data).then(function (pdfDocument) {
-                pdfDocument.getPage(1).then(function getPageHelloWorld(page) {
-                    var scale = 1.5;
-                    var viewport = page.getViewport(scale);
-
-                    // Prepare canvas using PDF page dimensions
-                    var canvas = document.getElementById('pdf-canvas');
-                    var context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    // Render PDF page into canvas context
-                    var renderContext = {
-                        canvasContext: context,
-                        viewport: viewport
-                    };
-                    page.render(renderContext);
+            // if we've read the pdf document before, just reuse it, otherwise load it first.
+            if (file.pdfDocument != null) {
+                renderPdfDocument(file.pdfDocument, file.currentPage);
+            } else {
+                var data = new Uint8Array(fs.readFileSync(file.path));
+                PDFJS.getDocument(data).then(function (pdfDocument) {
+                    // set the max page now that we know it
+                    $scope.$apply(function () {
+                        file.pdfDocument = pdfDocument;
+                    });
+                    renderPdfDocument(pdfDocument, file.currentPage);
                 });
-            });
+            }
+
         };
 
     }

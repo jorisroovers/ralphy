@@ -57,10 +57,39 @@ body, html {
     cursor: pointer;
 }
 
+/* PDF rendering */
+
 #pdf-canvas {
-    width: 200px;
-    height: 300px;
-    border: 1px solid;
+    width: 360px;
+    height: 480px;
+    border: 1px solid #bbb;
+    padding: 2px;
+}
+
+#pdf-container {
+    position: relative;
+    display: inline-block;
+}
+
+.pdf-nav-button {
+    color: rgba(0, 0, 0, 0.4);
+    position: absolute;
+    bottom: 10px;
+    left: calc(50% - 40px);
+}
+
+.pdf-nav-button:last-child {
+    left: calc(50%);
+}
+
+.pdf-nav-button:hover {
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.7);
+}
+
+.pdf-nav-button-disabled {
+    color: rgba(0, 0, 0, 0.1) !important;
+    cursor: not-allowed !important;
 }
 
 /* Settings */
