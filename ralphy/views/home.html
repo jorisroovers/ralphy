@@ -18,7 +18,10 @@
 </div>
 
 <form ng-submit="changeName()">
-    <input id="active-filename" type="text" ng-model="fileNameField"/>
+    <div>
+        <span id="proposed-tag" type="text" ng-model="proposed.tag.tag" contenteditable="true"></span>
+        <input id="active-filename" type="text" ng-model="proposed.name"/>
+    </div>
     <button type="submit">Rename</button>
 </form>
-<div ng-repeat="file in files"><a href="" ng-click="activate(file)">{{file}}</a></div>
+<div ng-repeat="file in files"><a href="" ng-click="activate(file)" focus-tag>{{file}}</a></div>

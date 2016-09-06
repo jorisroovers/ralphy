@@ -12,8 +12,48 @@ PDFJS.workerSrc = '../node_modules/pdfjs-dist/build/pdf.worker.js';
 
 
 angular.module('ralphy', ['ngRoute'])
-    .factory('Settings', function () {
+    .directive('focusTag', function () {
+        return {
+            link: function (scope, element, attrs) {
+                element.bind('click', function () {
+                    var tagEl = document.querySelector("#proposed-tag");
+                    tagEl.focus();
+                    // tagEl.setSelectionRange(0, tagEl.value.length);
+                    // tagEl.select();
+                    var selection = window.getSelection();
+                    var range = document.createRange();
+                    range.selectNodeContents(tagEl);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                });
+            }
+        };
+    })
+    .directive("contenteditable", function () {
+        return {
+            restrict: "A",
+            require: "ngModel",
+            link: function (scope, element, attrs, ngModel) {
 
+                element.bind("keydown keypress", function (event) {
+                    if (event.which === 13) {
+                        event.preventDefault();
+                    }
+                });
+
+                function read() {
+                    ngModel.$setViewValue(element.text());
+                }
+
+                ngModel.$render = function () {
+                    element.html(ngModel.$viewValue || "");
+                };
+
+                element.bind("blur keyup change", function () {
+                    scope.$apply(read);
+                });
+            }
+        };
     })
     .config(function ($routeProvider) {
 
@@ -72,7 +112,6 @@ angular.module('ralphy', ['ngRoute'])
 
             $scope.files = files;
 
-            console.log($scope.activeFile);
             // make the first file active if no file is active yet
             if ($scope.files.length > 0) {
                 $scope.activate($scope.files[0]);
@@ -97,10 +136,16 @@ angular.module('ralphy', ['ngRoute'])
         init().then(readFiles).then(watchScansDirectory);
 
         $scope.changeName = function () {
-            var newFilePath = path.join($scope.activeFile.dirPath, $scope.fileNameField);
-            console.log($scope.activeFile.path, "==>", newFilePath);
+            // only apply tag if there is one
+            var newName = $scope.proposed.name;
+            if ($scope.proposed.tag.tag.trim() != "") {
+                newName = "[" + $scope.proposed.tag.tag + "] " + $scope.proposed.name;
+            }
+            var newFilePath = path.join($scope.activeFile.dirPath, newName);
+
             // only save when the new file path is actually different!
             if ($scope.activeFile.path != newFilePath) {
+                console.log($scope.activeFile.path, "==>", newFilePath);
                 fs.rename($scope.activeFile.path, newFilePath, function (err) {
                     if (err) throw err;
                     console.log("[RENAMED]", newFilePath);
@@ -110,19 +155,32 @@ angular.module('ralphy', ['ngRoute'])
         };
 
         $scope.applyTag = function (tag) {
-            $scope.fileNameField = "[" + tag.tag + "] " + $scope.fileNameField;
+            $scope.proposed.tag = tag;
         };
 
         $scope.activate = function (fileName) {
             var filePath = path.join(settings.watchDirectory, fileName);
+            var originalTag = fileName.match(/(\[.*\])(.*)/);
+            var tag = "";
+            if (originalTag) {
+                var tag = originalTag[1].replace(/\[|\]/g, "").toLowerCase();
+            }
+
             $scope.activeFile = {
                 path: filePath,
                 dirPath: settings.watchDirectory,
                 name: fileName,
                 currentPage: 1,
-                pdfDocument: null
+                pdfDocument: null,
+                tag: {displayName: tag, tag: tag}
             };
-            $scope.fileNameField = fileName;
+
+            var proposedName = $scope.activeFile.name.replace("[" + $scope.activeFile.tag.tag + "] ", "")
+
+            $scope.proposed = {
+                name: proposedName,
+                tag: $scope.activeFile.tag
+            };
             renderPdf($scope.activeFile);
         };
 
