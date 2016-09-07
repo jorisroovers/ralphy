@@ -8,7 +8,7 @@ const chokidar = require('chokidar');
 // http://mozilla.github.io/pdf.js/examples/learning/helloworld.html
 const pdf = require('pdfjs-dist');
 
-PDFJS.workerSrc = '../node_modules/pdfjs-dist/build/pdf.worker.js';
+PDFJS.workerSrc = '../../node_modules/pdfjs-dist/build/pdf.worker.js';
 
 
 angular.module('ralphy', ['ngRoute'])

@@ -59,6 +59,7 @@ body, html {
 #proposed-tag {
     display: inline-block;
     height: 25px;
+    min-width: 50px;
     line-height: 25px;
     font-size: 18px;
     border: 0;
