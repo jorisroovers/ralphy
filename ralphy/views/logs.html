@@ -1,0 +1,18 @@
+<h1>LOGS</h1>
+Last run: {{log.lastRun}}
+
+<table id="logs">
+    <tr>
+        <th>Action</th>
+        <th>Date</th>
+        <th>Original Name</th>
+        <th>Destination</th>
+    </tr>
+    <tr ng-repeat="logEntry in log.logs" ng-class="logEntry.debug ? 'debug': ''">
+        <!--<td>{{logEntry}}</td>-->
+        <td>{{logEntry.action}}</td>
+        <td>{{logEntry.created}}</td>
+        <td>{{logEntry.oldName}}</td>
+        <td>{{logEntry.folderPath}}/{{logEntry.newName}}</td>
+    </tr>
+</table>

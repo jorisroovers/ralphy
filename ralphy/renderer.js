@@ -63,6 +63,10 @@ angular.module('ralphy', ['ngRoute'])
                 templateUrl: 'home.html'
                 // resolve: resolveProjects
             })
+            .when('/logs', {
+                controller: 'LogViewController as logViewCtrl',
+                templateUrl: 'logs.html'
+            })
             .when('/settings', {
                 controller: 'SettingsController as settingsCtrl',
                 templateUrl: 'settings.html'
@@ -207,6 +211,13 @@ angular.module('ralphy', ['ngRoute'])
         renderPdfDocument = function (pdfDocument, page) {
             pdfDocument.getPage(page).then(function (page) {
 
+                page.getTextContent().then(function (textContent) {
+                    angular.forEach(textContent.items, function (item) {
+                        // auto-label detection <- here!
+                        // console.log(item.str);
+                    });
+                })
+
                 var scale = 1.5;
                 var viewport = page.getViewport(scale);
 
@@ -242,14 +253,38 @@ angular.module('ralphy', ['ngRoute'])
 
         };
 
-    }
-    ])
+    }])
+    .controller('LogViewController', ['$scope', '$q', function ($scope, $q) {
+
+        var settings = {};
+        var init = function () {
+            var deferred = $q.defer();
+            storage.get('settings.user', function (error, data) {
+                settings = data;
+                deferred.resolve();
+            });
+            return deferred.promise;
+        };
+        $scope.log = [];
+
+        var readLogs = function () {
+            var logFilePath = path.join(settings.watchDirectory, settings.googleDriveLogFile);
+            $scope.log = JSON.parse(fs.readFileSync(logFilePath, 'utf8'));
+        };
+
+        init().then(readLogs);
+
+
+        console.log('READING LOGS');
+    }])
     .controller('SettingsController', ['$scope', '$timeout', function ($scope, $timeout) {
         // Use https://github.com/jviotti/electron-json-storage together with electron's remote
 
         DEFAULT_SETTINGS = {
             "watchDirectory": "",
-            "watchFilePattern": "test-scan(.*)\.pdf"
+            "watchFilePattern": "test-scan(.*)\.pdf",
+            "googleDriveLogFile": "ralphy-automove-log.json",
+            "googleDriveConfigFile": "ralphy-config.json",
         };
 
         storage.get('settings.user', function (error, data) {

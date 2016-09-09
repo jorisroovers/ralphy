@@ -11,6 +11,14 @@
         <label for="watchFilePattern">New file pattern</label>
         <input id="watchFilePattern" type="text" ng-model="userSettings.watchFilePattern"/>
     </div>
+    <div class="form-group">
+        <label for="googleDriveConfigFile">Google Drive Config File</label>
+        <input id="googleDriveConfigFile" type="text" ng-model="userSettings.googleDriveConfigFile"/>
+    </div>
+    <div class="form-group">
+        <label for="googleDriveLogFile">New file pattern</label>
+        <input id="googleDriveLogFile" type="text" ng-model="userSettings.googleDriveLogFile"/>
+    </div>
     <button ng-disabled="form.$pristine" ng-click="save()">Save</button>
     <button ng-click="reset()">Reset</button>
     {{statusMessage}}

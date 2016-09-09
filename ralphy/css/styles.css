@@ -15,9 +15,13 @@ body, html {
     color: white;
 }
 
+#navigation li:first-child {
+    margin-top: 5px;
+}
+
 #navigation li {
     padding: 0 7px;
-    margin: 5px 0;
+    margin: 15px 0;
 }
 
 #navigation a {
@@ -112,11 +116,30 @@ body, html {
 
 .form-group {
     margin: 2px 0;
-
 }
 
 label {
-    width: 150px;
+    width: 200px;
     text-align: right;
     display: inline-block;
+}
+
+/* Logs */
+
+#logs {
+    border-spacing: 0;
+}
+
+#logs td {
+    border-bottom: 1px solid #ccc;
+    padding: 3px;
+}
+
+#logs tr.debug {
+    background: #f0f0f5;
+;
+}
+
+#logs tr:last-child td {
+    border: 0;
 }

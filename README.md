@@ -18,3 +18,5 @@ Ralphy development is just getting started. Some of the things we'd like:
 - Reading tag file
 - Bugfix: support slashes in tags
 - Links to Google drive and local watch directory
+- autodetect tags and titles via OCR
+- 
