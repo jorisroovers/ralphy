@@ -7,7 +7,11 @@
     <link rel="stylesheet" href="../css/styles.css" type="text/css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.js"></script>
-    <script>require('./../renderer.js')</script>
+    <script>require('../renderer.js')</script>
+    <script>require('../controllers/NavigationCtrl.js')</script>
+    <script>require('../controllers/TaggingCtrl.js')</script>
+    <script>require('../controllers/SettingsCtrl.js')</script>
+    <script>require('../controllers/LogViewCtrl.js')</script>
 </head>
 <body>
 
@@ -15,7 +19,8 @@
     <li><a href="#/"><i class="fa fa-tags fa-2x" aria-hidden="true"></i></a></li>
     <li><a href="#/logs"><i class="fa fa-list-alt fa-2x" aria-hidden="true"></i></a></li>
     <li><a href="#/settings"><i class="fa fa-cog fa-2x" aria-hidden="true"></i></a></li>
-    <li id="debug-button"><a href="" ng-click="navCtrl.toggleDebug()"><i class="fa fa-terminal fa-2x" aria-hidden="true"></i></a></li>
+    <li id="debug-button"><a href="" ng-click="navCtrl.toggleDebug()"><i class="fa fa-terminal fa-2x"
+                                                                         aria-hidden="true"></i></a></li>
 </ul>
 
 <div id="view" ng-view></div>

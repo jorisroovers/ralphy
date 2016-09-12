@@ -1,0 +1,37 @@
+<div id="file-browser">
+    <table id="file-list">
+        <tr class="file" ng-repeat="file in files">
+            <td class="tag-column"><span class="tag">{{file.tag.displayName}}</span></td>
+            <td><a href="" ng-click="activate(file.name)" focus-tag>{{file.nameTagless}}</a></td>
+        </tr>
+    </table>
+
+    <div id="active-file">
+        <div id="pdf-container">
+            <canvas id="pdf-canvas"></canvas>
+            <!--<div ng-show="activeFile.currentPage != activeFile.maxPage">-->
+            <i class="fa fa-2x fa-chevron-circle-left pdf-nav-button" aria-hidden="true"
+               ng-class="activeFile.currentPage == 1 && 'pdf-nav-button-disabled'"
+               ng-click="pdfPrevPage()"></i>
+
+            <i class="fa fa-2x fa-chevron-circle-right pdf-nav-button" aria-hidden="true"
+               ng-class="activeFile.currentPage == activeFile.pdfDocument.numPages && 'pdf-nav-button-disabled'"
+               ng-click="pdfNextPage()"></i>
+            <!--</div>-->
+        </div>
+
+        <form ng-submit="changeName()">
+            <div id="proposed-container">
+                <span id="proposed-tag" type="text" ng-model="proposed.tag.tag" contenteditable="true"></span>
+                <span id="proposed-filename" type="text" ng-model="proposed.name" contenteditable="true"></span>
+                <span id="pdf-extension">.pdf</span>
+            </div>
+            <button type="submit">Rename</button>
+        </form>
+    </div>
+
+</div>
+
+<div id="tags">
+    <div class="tag" ng-repeat="tag in tags" ng-click="applyTag(tag)">{{tag.displayName}}</div>
+</div>
