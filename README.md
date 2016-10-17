@@ -14,9 +14,9 @@ npm start
 Ralphy development is just getting started. Some of the things we'd like:
 - Sass
 - Unit and Integration tests
-- Automoved.log reader integration
 - Reading tag file
 - Bugfix: support slashes in tags
 - Links to Google drive and local watch directory
-- autodetect tags and titles via OCR
-- 
+- Autodetect tags and titles via OCR
+- Notifications on new log entries
+- Show which page is active in nav

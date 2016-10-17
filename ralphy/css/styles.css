@@ -1,5 +1,6 @@
 html * {
     margin: 0;
+    /*overflow-y: hidden; !* get rid of weird vertical scrollbar in main window *!*/
 }
 
 body, html {
@@ -45,8 +46,16 @@ body, html {
 
 /* Tagging */
 
+#tags {
+    content: " ";
+    clear: both;
+    display: block;
+    border-top: 1px solid #bbbbbb;
+
+}
+
 #tags .tag {
-    display: inline;
+    display: inline-block;
     background-color: orange;
     padding: 3px 10px;
     border-radius: 2px;
@@ -58,10 +67,23 @@ body, html {
     cursor: pointer;
 }
 
+.unknown-tag {
+    color: black !important;
+    border: 1px solid black !important;
+    background-color: white !important;
+}
+
 #file-browser:after {
     content: " ";
     clear: both;
     display: block;
+}
+
+#file-browser tbody {
+    display: block;
+    height: 480px;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 #file-list {
@@ -70,11 +92,12 @@ body, html {
 }
 
 #file-list .file {
-    margin: 5px 0;
+    margin: 10px 0;
 }
 
 #file-list .tag-column {
     text-align: right;
+    height: 18px;
 }
 
 #file-list .tag {
@@ -86,8 +109,19 @@ body, html {
     font-size: 0.7rem;
 }
 
+#file-list .no-tag {
+    display: inline;
+    background-color: #eee;
+    padding: 3px;
+    border-radius: 2px;
+    color: #bbb;
+    font-size: 0.7rem;
+}
+
+
 #active-file {
     float: left;
+    width: 50%;
 }
 
 #proposed-container {

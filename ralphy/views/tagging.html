@@ -1,7 +1,10 @@
 <div id="file-browser">
     <table id="file-list">
         <tr class="file" ng-repeat="file in files">
-            <td class="tag-column"><span class="tag">{{file.tag.displayName}}</span></td>
+            <td class="tag-column">
+                <span class="no-tag" ng-show="file.tag.displayName == ''">NO TAG</span>
+                <span class="tag" ng-class="file.tag.unknown && 'unknown-tag'" ng-show="file.tag.displayName != ''">{{file.tag.displayName}}</span>
+            </td>
             <td><a href="" ng-click="activate(file.name)" focus-tag>{{file.nameTagless}}</a></td>
         </tr>
     </table>
@@ -33,5 +36,5 @@
 </div>
 
 <div id="tags">
-    <div class="tag" ng-repeat="tag in tags" ng-click="applyTag(tag)">{{tag.displayName}}</div>
+    <div class="tag" ng-class="tagObj.unknown && 'unknown-tag'" ng-repeat="(tag,tagObj) in tags" ng-click="applyTag(tagObj)">{{tag}}</div>
 </div>

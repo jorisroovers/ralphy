@@ -11,11 +11,7 @@ PDFJS.workerSrc = '../../node_modules/pdfjs-dist/build/pdf.worker.js';
 
 angular.module('ralphy').controller('TaggingController', ['$scope', '$q', function ($scope, $q) {
 
-    $scope.tags = [
-        {displayName: "CZ", tag: "cz"},
-        {displayName: "ING", tag: "ing"},
-        {displayName: "Breda", tag: "breda"}
-    ];
+    $scope.tags = {};
 
     $scope.activeFile = null;
     var settings = {};
@@ -30,7 +26,9 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
     };
 
     readFiles = function () {
-        console.log("read files");
+        // first, let's reread the configfile as this can influence what we do next
+        readConfigFile();
+
         files = fs.readdirSync(settings.watchDirectory);
         // Only show pdf files (for now we just say a file is a PDF if it has the .pdf extension).
         files = files.filter(function (file) {
@@ -46,17 +44,26 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
         // convert the files to proper objects that have extra metadata
         var fileObjs = [];
         angular.forEach(files, function (fileName) {
-            var tag = getTag(fileName);
-            var fileObj = {name: fileName, tag: {displayName: tag, tag: tag}, nameTagless: stripTag(fileName, tag)};
+            var tagObj = getTagFromFileName(fileName);
+            var fileObj = {name: fileName, tag: tagObj, nameTagless: stripTag(fileName, tagObj.tag)};
             fileObjs.push(fileObj);
         });
         $scope.files = fileObjs;
-
 
         // make the first file active if no file is active yet
         if ($scope.files.length > 0 && $scope.activeFile == null) {
             $scope.activate($scope.files[0].name);
         }
+    };
+
+    readConfigFile = function () {
+        var configFilePath = path.join(settings.watchDirectory, settings.googleDriveConfigFile);
+        var config = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
+        angular.forEach(config.tags, function (obj, key) {
+            var tagData = {tag: key, displayName: key};
+            tagData = angular.extend(tagData, obj); // add the tag data from the config tag
+            $scope.tags[key] = tagData;
+        });
     };
 
     watchScansDirectory = function () {
@@ -108,7 +115,6 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
 
     $scope.activate = function (fileName) {
         var filePath = path.join(settings.watchDirectory, fileName);
-        var tag = getTag(fileName);
 
         $scope.activeFile = {
             path: filePath,
@@ -116,7 +122,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
             name: fileName,
             currentPage: 1,
             pdfDocument: null,
-            tag: {displayName: tag, tag: tag}
+            tag: getTagFromFileName(fileName)
         };
 
         var proposedName = stripTag($scope.activeFile.name, $scope.activeFile.tag.tag)
@@ -148,15 +154,34 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
         }
     };
 
-    getTag = function (fileName) {
-        var originalTag = fileName.match(/(\[.*\])(.*)/);
-        var tag = "";
-        if (originalTag) {
-            var tag = originalTag[1].replace(/\[|\]/g, "").toLowerCase();
+    /**
+     * Given a filename, get the tag from the filename.
+     * If the tag that is extracted from the filename is not found in the list of known tags, then create a new tag.
+     **/
+    getTagFromFileName = function (fileName) {
+        var originalTagStr = fileName.match(/(\[.*\])(.*)/);
+        var tagStr = "";
+        if (originalTagStr) {
+            var tagStr = originalTagStr[1].replace(/\[|\]/g, "").toLowerCase();
+        }
+        var tag = getTag(tagStr);
+
+        return tag;
+    };
+
+    /**
+     * Given a tag in string format, return the corresponding tag object. If no such
+     */
+    getTag = function (tagStr) {
+        var tag = $scope.tags[tagStr];
+        if (!tag) {
+            tag = {tag: tagStr, displayName: tagStr, unknown: true};
+            $scope.tags[tagStr] = tag;
         }
         return tag;
     };
 
+    /* Given a filename and a tag, strip the tag from the filename */
     stripTag = function (fileName, tag) {
         return fileName.replace("[" + tag + "] ", "");
     };
