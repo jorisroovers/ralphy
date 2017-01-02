@@ -45,7 +45,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
         var fileObjs = [];
         angular.forEach(files, function (fileName) {
             var tagObj = getTagFromFileName(fileName);
-            var fileObj = {name: fileName, tag: tagObj, nameTagless: stripTag(fileName, tagObj.tag)};
+            var fileObj = {name: fileName, tag: tagObj, nameTagless: stripTag(fileName, tagObj)};
             fileObjs.push(fileObj);
         });
         $scope.files = fileObjs;
@@ -56,6 +56,9 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
         }
     };
 
+    /**
+     * Read the ralphy configuration file and extract settings, tags, etc from it.
+     **/
     readConfigFile = function () {
         var configFilePath = path.join(settings.watchDirectory, settings.googleDriveConfigFile);
         var config = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
@@ -122,17 +125,18 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
             name: fileName,
             currentPage: 1,
             pdfDocument: null,
-            tag: getTagFromFileName(fileName)
+            tag: getTagFromFileName(fileName),
+            suggestedTags: []
         };
 
-        var proposedName = stripTag($scope.activeFile.name, $scope.activeFile.tag.tag)
+        var proposedName = stripTag($scope.activeFile.name, $scope.activeFile.tag)
         proposedName = proposedName.replace(/\.pdf$/, "");
 
         $scope.proposed = {
             name: proposedName,
             tag: $scope.activeFile.tag
         };
-        renderPdf($scope.activeFile);
+        renderPdf($scope.activeFile, suggestTag);
     };
 
     $scope.pdfNextPage = function () {
@@ -140,7 +144,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
         // don't re-render the same page
         if (newPage != $scope.activeFile.currentPage) {
             $scope.activeFile.currentPage = newPage;
-            renderPdf($scope.activeFile);
+            renderPdf($scope.activeFile, suggestTag);
         }
 
     };
@@ -150,7 +154,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
         // don't re-render the same page
         if (newPage != $scope.activeFile.currentPage) {
             $scope.activeFile.currentPage = newPage;
-            renderPdf($scope.activeFile);
+            renderPdf($scope.activeFile, suggestTag);
         }
     };
 
@@ -164,13 +168,14 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
         if (originalTagStr) {
             var tagStr = originalTagStr[1].replace(/\[|\]/g, "").toLowerCase();
         }
-        var tag = getTag(tagStr);
-
-        return tag;
+        if (tagStr == "") {
+            return null;
+        }
+        return getTag(tagStr);
     };
 
     /**
-     * Given a tag in string format, return the corresponding tag object. If no such
+     * Given a tag in string format, return the corresponding tag object. If no such tag exists, create it.
      */
     getTag = function (tagStr) {
         var tag = $scope.tags[tagStr];
@@ -182,19 +187,50 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
     };
 
     /* Given a filename and a tag, strip the tag from the filename */
-    stripTag = function (fileName, tag) {
+    stripTag = function (fileName, tagObj) {
+        if (!tagObj) {
+            return fileName;
+        }
+        var tag = tagObj.tag;
         return fileName.replace("[" + tag + "] ", "");
     };
 
-    renderPdfDocument = function (pdfDocument, page) {
-        pdfDocument.getPage(page).then(function (page) {
 
-            page.getTextContent().then(function (textContent) {
-                angular.forEach(textContent.items, function (item) {
-                    // auto-label detection <- here!
-                    // console.log(item.str);
+    suggestTag = function (pdfDocument, pageNr, page) {
+        page.getTextContent().then(function (textContent) {
+            var pageText = "";
+            angular.forEach(textContent.items, function (item) {
+                // cleanup the text content of the page
+                // replace spaces between individual letters but not words
+                // http://stackoverflow.com/a/19801470/381010
+                line = item.str.replace(/([A-Z])\s(?=[A-Z]\b)/gi, "$1");
+                // replace multiple spaces with a single one
+                line = line.replace(/ ( )+/g, " ");
+                pageText += line + "\n";
+            });
+
+            console.log(pageText);
+            $scope.$apply(function () {
+                angular.forEach($scope.tags, function (tag, tagName) {
+                    // http://stackoverflow.com/questions/2951915/javascript-reg-ex-to-match-whole-word-only-bound-only-by-whitespace
+                    var regex = new RegExp("(^|\s|\n)" + tagName + "(\s|$|\n)");
+                    var index = pageText.toLowerCase().search(regex);
+                    if (index != -1) {
+                        console.log("SUGGESTED TAG", tag);
+                        $scope.activeFile.suggestedTags.push(tag);
+                    }
                 });
-            })
+            });
+
+        });
+    };
+
+
+    renderPdfDocument = function (pdfDocument, pageNr, pageProcessor) {
+        pdfDocument.getPage(pageNr).then(function (page) {
+            if (pageProcessor) {
+                pageProcessor(pdfDocument, pageNr, page);
+            }
 
             var scale = 1.5;
             var viewport = page.getViewport(scale);
@@ -214,10 +250,10 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
         });
     };
 
-    renderPdf = function (file) {
+    renderPdf = function (file, pageProccessor) {
         // if we've read the pdf document before, just reuse it, otherwise load it first.
         if (file.pdfDocument != null) {
-            renderPdfDocument(file.pdfDocument, file.currentPage);
+            renderPdfDocument(file.pdfDocument, file.currentPage, pageProccessor);
         } else {
             var data = new Uint8Array(fs.readFileSync(file.path));
             PDFJS.getDocument(data).then(function (pdfDocument) {
@@ -225,7 +261,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
                 $scope.$apply(function () {
                     file.pdfDocument = pdfDocument;
                 });
-                renderPdfDocument(pdfDocument, file.currentPage);
+                renderPdfDocument(pdfDocument, file.currentPage, pageProccessor);
             });
         }
 

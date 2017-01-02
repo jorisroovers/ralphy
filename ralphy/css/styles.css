@@ -46,15 +46,17 @@ body, html {
 
 /* Tagging */
 
-#tags {
+#all-tags {
+    border-top: 1px solid #bbbbbb;
+}
+
+.tag-group {
     content: " ";
     clear: both;
     display: block;
-    border-top: 1px solid #bbbbbb;
-
 }
 
-#tags .tag {
+.tag-group .tag {
     display: inline-block;
     background-color: orange;
     padding: 3px 10px;
@@ -117,7 +119,6 @@ body, html {
     color: #bbb;
     font-size: 0.7rem;
 }
-
 
 #active-file {
     float: left;

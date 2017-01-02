@@ -2,8 +2,9 @@
     <table id="file-list">
         <tr class="file" ng-repeat="file in files">
             <td class="tag-column">
-                <span class="no-tag" ng-show="file.tag.displayName == ''">NO TAG</span>
-                <span class="tag" ng-class="file.tag.unknown && 'unknown-tag'" ng-show="file.tag.displayName != ''">{{file.tag.displayName}}</span>
+                <span class="no-tag" ng-show="file.tag == null || file.tag.displayName == ''">NO TAG</span>
+                <span class="tag" ng-class="file.tag.unknown && 'unknown-tag'"
+                      ng-show="file.tag && file.tag.displayName != ''">{{file.tag.displayName}}</span>
             </td>
             <td><a href="" ng-click="activate(file.name)" focus-tag>{{file.nameTagless}}</a></td>
         </tr>
@@ -29,12 +30,22 @@
                 <span id="proposed-filename" type="text" ng-model="proposed.name" contenteditable="true"></span>
                 <span id="pdf-extension">.pdf</span>
             </div>
+            <div class="tag-group">
+                Suggested tags:
+                <div class="tag" ng-class="tagObj.unknown && 'unknown-tag'"
+                     ng-repeat="tagObj in activeFile.suggestedTags"
+                     ng-click="applyTag(tagObj)">
+                    {{tagObj.displayName}}
+                </div>
+            </div>
             <button type="submit">Rename</button>
         </form>
     </div>
 
 </div>
 
-<div id="tags">
-    <div class="tag" ng-class="tagObj.unknown && 'unknown-tag'" ng-repeat="(tag,tagObj) in tags" ng-click="applyTag(tagObj)">{{tag}}</div>
+<div id="all-tags" class="tag-group">
+    <div class="tag" ng-class="tagObj.unknown && 'unknown-tag'" ng-repeat="(tag,tagObj) in tags"
+         ng-click="applyTag(tagObj)">{{tag}}
+    </div>
 </div>
