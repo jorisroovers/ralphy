@@ -38,6 +38,12 @@
                     {{tagObj.displayName}}
                 </div>
             </div>
+            <div class="variable-group">
+                Variables:
+                <div class="variable" ng-click="alert('TODO')">- %{date}</div>
+                <div class="variable">- %{year}</div>
+            </div>
+
             <button type="submit">Rename</button>
         </form>
     </div>
@@ -45,7 +51,29 @@
 </div>
 
 <div id="all-tags" class="tag-group">
-    <div class="tag" ng-class="tagObj.unknown && 'unknown-tag'" ng-repeat="(tag,tagObj) in tags"
-         ng-click="applyTag(tagObj)">{{tag}}
+    <div ng-repeat="(tag,tagObj) in tags" class="tag" ng-class="tagObj.unknown && 'unknown-tag'">
+        <div ng-click="applyTag(tagObj)">
+            {{tag}}
+        </div>
+        <i class="fa fa-cog edit-tag" aria-hidden="true" ng-click="editTag(tagObj)"></i>
+    </div>
+</div>
+
+<div id="current-tag">
+    <div ng-show="activeTag == null">Select a tag to see its details</div>
+    <div ng-show="activeTag != null">
+        <h1>{{activeTag.displayName}}</h1>
+        <form ng-submit="saveTags()">
+            <div class="form-group">
+                <label for="activeTagDest">Target destination</label>
+                <input id="activeTagDest" type="text" ng-model="activeTag.dest"/>
+            </div>
+            <div class="form-group">
+                <label for="activeKeywords">Keywords</label>
+                <input id="activeKeywords" type="text" ng-list="," ng-model="activeTag.keywords"/>
+            </div>
+            <button type="submit">Save</button>
+            <button class="delete-tag-button" ng-click="deleteTag(activeTag)">Delete</button>
+        </form>
     </div>
 </div>

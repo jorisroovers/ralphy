@@ -9,11 +9,17 @@ const pdf = require('pdfjs-dist');
 PDFJS.workerSrc = '../../node_modules/pdfjs-dist/build/pdf.worker.js';
 
 
-angular.module('ralphy').controller('TaggingController', ['$scope', '$q', function ($scope, $q) {
+angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filter', function ($scope, $q, $filter) {
 
+    // all the available tags
     $scope.tags = {};
 
+    // the file currently being shown/active
     $scope.activeFile = null;
+
+    // the tag that is active, i.e. being edited
+    $scope.activeTag = null;
+
     var settings = {};
 
     var init = function () {
@@ -158,6 +164,34 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
         }
     };
 
+    $scope.editTag = function (tag) {
+        $scope.activeTag = tag;
+    };
+
+    $scope.saveTags = function () {
+        var configFilePath = path.join(settings.watchDirectory, settings.googleDriveConfigFile);
+        var config = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
+
+        // only save the tags that we know, i.e. those that we previously loaded from file.
+        config.tags = {};
+        angular.forEach($scope.tags, function (tag, tagName) {
+            if (tag.hasOwnProperty("dest")) {
+                config.tags[tagName] = tag;
+                tag.unknown = false; // if a tag has a destination, it becomes a known tag
+            }
+        });
+
+        fs.writeFile(configFilePath, angular.toJson(config, 4), 'utf-8');
+    };
+
+    $scope.deleteTag = function (tag) {
+        if (tag == $scope.activeTag) {
+            $scope.activeTag = null;
+        }
+        delete $scope.tags[tag.tag];
+        $scope.saveTags();
+    };
+
     /**
      * Given a filename, get the tag from the filename.
      * If the tag that is extracted from the filename is not found in the list of known tags, then create a new tag.
@@ -195,7 +229,6 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
         return fileName.replace("[" + tag + "] ", "");
     };
 
-
     suggestTag = function (pdfDocument, pageNr, page) {
         page.getTextContent().then(function (textContent) {
             var pageText = "";
@@ -209,11 +242,13 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
                 pageText += line + "\n";
             });
 
-            console.log(pageText);
+            console.log(pageText.toLowerCase());
             $scope.$apply(function () {
                 angular.forEach($scope.tags, function (tag, tagName) {
+                    // Search on word boundary, not within words
                     // http://stackoverflow.com/questions/2951915/javascript-reg-ex-to-match-whole-word-only-bound-only-by-whitespace
-                    var regex = new RegExp("(^|\s|\n)" + tagName + "(\s|$|\n)");
+                    // We also have to double escape \s and \n in double quotes
+                    var regex = new RegExp("(^|\\s|\\n)" + tagName + "(\\s|$|\\n)");
                     var index = pageText.toLowerCase().search(regex);
                     if (index != -1) {
                         console.log("SUGGESTED TAG", tag);
@@ -224,7 +259,6 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
 
         });
     };
-
 
     renderPdfDocument = function (pdfDocument, pageNr, pageProcessor) {
         pdfDocument.getPage(pageNr).then(function (page) {
@@ -264,7 +298,6 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', functi
                 renderPdfDocument(pdfDocument, file.currentPage, pageProccessor);
             });
         }
-
     };
 
-}])
+}]);

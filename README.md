@@ -20,3 +20,6 @@ Ralphy development is just getting started. Some of the things we'd like:
 - Notifications on new log entries
 - Show which page is active in nav
 - Modifying tags/Showing tag info in dashboard
+- Deep linking into Google Drive for log files
+- Auto-complete tags
+- Color proposed tag based on known tag or not

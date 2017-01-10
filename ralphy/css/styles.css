@@ -44,13 +44,29 @@ body, html {
     width: calc(100% - 60px);
 }
 
+/* Variable */
+
+.variable-group .variable {
+    display: inline-block;
+    background-color: cornflowerblue;
+    padding: 3px 10px;
+    border-radius: 2px;
+    color: aliceblue;
+    margin: 5px;
+}
+
+.delete-tag-button {
+    float: right;
+    color: red;
+}
+
 /* Tagging */
 
 #all-tags {
     border-top: 1px solid #bbbbbb;
 }
 
-.tag-group {
+.tag-group, .variable-group {
     content: " ";
     clear: both;
     display: block;
@@ -69,10 +85,26 @@ body, html {
     cursor: pointer;
 }
 
+.tag div {
+    display: inline;
+}
+
 .unknown-tag {
     color: black !important;
     border: 1px solid black !important;
     background-color: white !important;
+}
+
+.edit-tag-icon {
+    display: inline;
+}
+
+#current-tag {
+    border-top: 1px solid #bbbbbb;
+}
+
+#current-tag input {
+    width: 600px;
 }
 
 #file-browser:after {
@@ -161,7 +193,7 @@ body, html {
 /* PDF rendering */
 
 #pdf-canvas {
-    width: 360px;
+    /*width: 360px;*/
     height: 480px;
     border: 1px solid #bbb;
     padding: 2px;
