@@ -60,6 +60,20 @@ body, html {
     color: red;
 }
 
+/* Suggested filename */
+
+.suggested-filename:hover {
+    cursor: pointer;
+}
+
+.suggested-filename {
+    display: inline-block;
+    font-size: 85%;
+    border-radius: 2px;
+    padding: 3px 10px;
+    background-color: #ffe14a;
+}
+
 /* Tagging */
 
 #all-tags {

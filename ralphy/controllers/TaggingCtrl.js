@@ -122,6 +122,10 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
         $scope.proposed.tag = tag;
     };
 
+    $scope.applyFilename = function (filename) {
+        $scope.proposed.name = filename;
+    };
+
     $scope.activate = function (fileName) {
         var filePath = path.join(settings.watchDirectory, fileName);
 
@@ -132,7 +136,8 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
             currentPage: 1,
             pdfDocument: null,
             tag: getTagFromFileName(fileName),
-            suggestedTags: []
+            suggestedTags: [],
+            suggestedFilenames: []
         };
 
         var proposedName = stripTag($scope.activeFile.name, $scope.activeFile.tag)
@@ -142,7 +147,8 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
             name: proposedName,
             tag: $scope.activeFile.tag
         };
-        renderPdf($scope.activeFile, suggestTag);
+        renderPdf($scope.activeFile, suggestMetadata);
+        $scope.activeTag = $scope.activeFile.tag; // activate the tag of the current file
     };
 
     $scope.pdfNextPage = function () {
@@ -150,7 +156,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
         // don't re-render the same page
         if (newPage != $scope.activeFile.currentPage) {
             $scope.activeFile.currentPage = newPage;
-            renderPdf($scope.activeFile, suggestTag);
+            renderPdf($scope.activeFile, suggestMetadata);
         }
 
     };
@@ -160,7 +166,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
         // don't re-render the same page
         if (newPage != $scope.activeFile.currentPage) {
             $scope.activeFile.currentPage = newPage;
-            renderPdf($scope.activeFile, suggestTag);
+            renderPdf($scope.activeFile, suggestMetadata);
         }
     };
 
@@ -229,8 +235,10 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
         return fileName.replace("[" + tag + "] ", "");
     };
 
-    suggestTag = function (pdfDocument, pageNr, page) {
+    suggestMetadata = function (pdfDocument, pageNr, page) {
+        console.log(page);
         page.getTextContent().then(function (textContent) {
+            // cleanup the text
             var pageText = "";
             angular.forEach(textContent.items, function (item) {
                 // cleanup the text content of the page
@@ -242,18 +250,52 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
                 pageText += line + "\n";
             });
 
+
             console.log(pageText.toLowerCase());
+
+            // try to determine the filename from the title
+            const regex = /((onderwerp|betreft)(:|;)?\s)(.*)/i;
+            const matches = pageText.match(regex);
+            if (matches) {
+                $scope.activeFile.suggestedFilenames.push(matches[4]);
+                console.log("SUGGESTED FILENAME:", matches[4]);
+            }
+
+            // try to determine the year that is mentioned in the pagetext to make a smart suggestion
+            var foundYears = [];
+            for (var year = 2008; year <= parseInt(new Date().getFullYear()); year++) {
+                if (pageText.indexOf(year) > -1) {
+                    foundYears.push(year);
+                }
+            }
+            console.log("FOUND YEARS:", foundYears);
+
+            // try to determine the tag from the text
             $scope.$apply(function () {
                 angular.forEach($scope.tags, function (tag, tagName) {
                     // Search on word boundary, not within words
                     // http://stackoverflow.com/questions/2951915/javascript-reg-ex-to-match-whole-word-only-bound-only-by-whitespace
                     // We also have to double escape \s and \n in double quotes
-                    var regex = new RegExp("(^|\\s|\\n)" + tagName + "(\\s|$|\\n)");
-                    var index = pageText.toLowerCase().search(regex);
-                    if (index != -1) {
-                        console.log("SUGGESTED TAG", tag);
-                        $scope.activeFile.suggestedTags.push(tag);
-                    }
+                    var keywords = angular.copy(tag.keywords || []);
+                    keywords.push(tagName);
+                    angular.forEach(keywords, function (keyword) {
+                        const regex = new RegExp("(^|\\s|\\n|'|\")" + keyword.toLowerCase() + "(\\s|$|\\n|'|\")");
+                        const index = pageText.toLowerCase().search(regex);
+                        if (index != -1) {
+                            console.log("SUGGESTED TAG", tag);
+                            $scope.activeFile.suggestedTags.push(tag);
+
+                            // for each recent year that we found in the text, suggest a tag
+                            angular.forEach(foundYears, function (year) {
+                                var yearTag = angular.copy(tag);
+                                yearTag.tag = tag.tag + "-" + year;
+                                yearTag.displayName = tag.displayName + "-" + year;
+                                yearTag.unknown = false;
+                                console.log("SUGGESTED TAG", yearTag);
+                                $scope.activeFile.suggestedTags.push(yearTag);
+                            });
+                        }
+                    });
                 });
             });
 

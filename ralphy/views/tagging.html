@@ -38,6 +38,14 @@
                     {{tagObj.displayName}}
                 </div>
             </div>
+            <div>
+                Suggested filenames:
+                <div class="suggested-filename"
+                     ng-repeat="filename in activeFile.suggestedFilenames"
+                     ng-click="applyFilename(filename)">
+                    {{filename}}
+                </div>
+            </div>
             <div class="variable-group">
                 Variables:
                 <div class="variable" ng-click="alert('TODO')">- %{date}</div>
