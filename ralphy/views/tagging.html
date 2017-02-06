@@ -33,7 +33,7 @@
             <div class="tag-group">
                 Suggested tags:
                 <div class="tag" ng-class="tagObj.unknown && 'unknown-tag'"
-                     ng-repeat="tagObj in activeFile.suggestedTags"
+                     ng-repeat="(tagName, tagObj) in activeFile.suggestedTags"
                      ng-click="applyTag(tagObj)">
                     {{tagObj.displayName}}
                 </div>

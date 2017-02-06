@@ -15,18 +15,19 @@ body, html {
     width: 50px;
     float: left;
     height: 100%;
-    padding: 5px 0;
+    padding: 0 0;
     background-color: #165a89;
     color: white;
-}
-
-#navigation li:first-child {
-    margin-top: 5px;
+    position: relative;
 }
 
 #navigation li {
-    padding: 0 7px;
-    margin: 15px 0;
+    padding: 10px 10px;
+    margin: 0;
+}
+
+#navigation li.active {
+    background-color: #178ac8;
 }
 
 #navigation a {
@@ -36,6 +37,11 @@ body, html {
 #debug-button {
     position: absolute;
     bottom: 0;
+    width: 30px;
+}
+
+#debug-button.active {
+    background-color: #fb9682 !important;
 }
 
 #view {
@@ -275,4 +281,13 @@ label {
 
 #logs tr:last-child td {
     border: 0;
+}
+
+#logs td.destination {
+    text-decoration: underline;
+    color: blue;
+}
+
+#logs td.destination:hover {
+    cursor: pointer;
 }

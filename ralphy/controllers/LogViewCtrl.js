@@ -2,6 +2,8 @@ const fs = require('fs');
 const storage = require('electron-json-storage');
 const path = require('path');
 
+const ipcRenderer = window.require("electron").ipcRenderer;
+
 angular.module('ralphy').controller('LogViewController', ['$scope', '$q', function ($scope, $q) {
 
     var settings = {};
@@ -19,6 +21,11 @@ angular.module('ralphy').controller('LogViewController', ['$scope', '$q', functi
         var logFilePath = path.join(settings.watchDirectory, settings.googleDriveLogFile);
         var log = JSON.parse(fs.readFileSync(logFilePath, 'utf8'));
         $scope.log = log;
+    };
+
+    $scope.openUrl = function (url) {
+        console.log("test " + url);
+        ipcRenderer.send('open-external', url);
     };
 
     init().then(readLogs);

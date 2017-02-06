@@ -1,6 +1,7 @@
 const electron = require('electron');
 const ipcMain = electron.ipcMain;
 const app = electron.app;
+const shell = electron.shell;
 const BrowserWindow = electron.BrowserWindow;
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -27,6 +28,7 @@ function createWindow() {
             return false;
         }
     });
+
 }
 
 
@@ -63,8 +65,14 @@ app.on('activate', function () {
     }
 });
 
+// events send by client
 ipcMain.on('toggle-dev-tools', function (event, arg) {
     mainWindow.webContents.toggleDevTools();
+});
+
+ipcMain.on('open-external', function (event, arg) {
+    console.log("Opening", arg);
+    shell.openExternal(arg);
 });
 
 ipcMain.on('show-main-window', function (event, arg) {
@@ -74,3 +82,16 @@ ipcMain.on('show-main-window', function (event, arg) {
         mainWindow.show();
     }
 });
+
+ipcMain.on('register-for-devtools-updates', function (event) {
+    // handle devtool window events
+    mainWindow.webContents.on('devtools-opened', function (event, arg) {
+        event.sender.send('devtools-toggle', "open");
+    });
+
+    mainWindow.webContents.on('devtools-closed', function (event, arg) {
+        event.sender.send('devtools-toggle', "closed");
+    });
+
+});
+

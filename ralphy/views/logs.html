@@ -14,7 +14,10 @@ Last run: {{log.lastRun}}
             <td>{{logEntry.action}}</td>
             <td>{{logEntry.created}}</td>
             <td>{{logEntry.oldName}}</td>
-            <td>{{logEntry.folderPath}}/{{logEntry.newName}}</td>
+            <td ng-show="logEntry.url != null" ng-click="openUrl(logEntry.url)" class="destination">
+                {{logEntry.folderPath}}/{{logEntry.newName}}
+            </td>
+            <td ng-show="logEntry.url == null">{{logEntry.folderPath}}/{{logEntry.newName}}</td>
         </tr>
     </table>
 </div>

@@ -136,7 +136,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
             currentPage: 1,
             pdfDocument: null,
             tag: getTagFromFileName(fileName),
-            suggestedTags: [],
+            suggestedTags: {},
             suggestedFilenames: []
         };
 
@@ -283,7 +283,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
                         const index = pageText.toLowerCase().search(regex);
                         if (index != -1) {
                             console.log("SUGGESTED TAG", tag);
-                            $scope.activeFile.suggestedTags.push(tag);
+                            $scope.activeFile.suggestedTags[tag.tag] = tag;
 
                             // for each recent year that we found in the text, suggest a tag
                             angular.forEach(foundYears, function (year) {
@@ -292,7 +292,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
                                 yearTag.displayName = tag.displayName + "-" + year;
                                 yearTag.unknown = false;
                                 console.log("SUGGESTED TAG", yearTag);
-                                $scope.activeFile.suggestedTags.push(yearTag);
+                                $scope.activeFile.suggestedTags[yearTag.tag] = yearTag;
                             });
                         }
                     });
