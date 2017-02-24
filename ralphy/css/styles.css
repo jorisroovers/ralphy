@@ -127,6 +127,8 @@ body, html {
     width: 600px;
 }
 
+/* File browser */
+
 #file-browser:after {
     content: " ";
     clear: both;
@@ -142,6 +144,7 @@ body, html {
 
 #file-list {
     float: left;
+    border-collapse: collapse;
     width: 50%;
 }
 
@@ -172,10 +175,21 @@ body, html {
     font-size: 0.7rem;
 }
 
+#file-list .filename-column:hover {
+    cursor: pointer;
+}
+
+#file-list tr.activeFile td {
+    color: white;
+    background: #178ac8;
+}
+
 #active-file {
     float: left;
     width: 50%;
 }
+
+/* Proposed File */
 
 #proposed-container {
     font-size: 0; /* No spacing between spans */
@@ -228,11 +242,14 @@ body, html {
     color: rgba(0, 0, 0, 0.4);
     position: absolute;
     bottom: 10px;
-    left: calc(50% - 40px);
 }
 
-.pdf-nav-button:last-child {
+.pdf-nav-button-right {
     left: calc(50%);
+}
+
+.pdf-nav-button-left {
+    left: calc(50% - 40px);
 }
 
 .pdf-nav-button:hover {
@@ -243,6 +260,14 @@ body, html {
 .pdf-nav-button-disabled {
     color: rgba(0, 0, 0, 0.1) !important;
     cursor: not-allowed !important;
+}
+
+.open-pdf-native {
+    right: 10px;
+}
+
+.open-pdf-in-folder {
+    right: 50px;
 }
 
 /* Settings */

@@ -1,12 +1,14 @@
 <div id="file-browser">
     <table id="file-list">
-        <tr class="file" ng-repeat="file in files">
+        <tr class="file" ng-repeat="file in files" ng-class="{activeFile: file.name == activeFile.name}">
             <td class="tag-column">
                 <span class="no-tag" ng-show="file.tag == null || file.tag.displayName == ''">NO TAG</span>
                 <span class="tag" ng-class="file.tag.unknown && 'unknown-tag'"
                       ng-show="file.tag && file.tag.displayName != ''">{{file.tag.displayName}}</span>
             </td>
-            <td><a href="" ng-click="activate(file.name)" focus-tag>{{file.nameTagless}}</a></td>
+            <td class="filename-column" ng-click="activate(file.name)">
+                {{file.nameTagless}}
+            </td>
         </tr>
     </table>
 
@@ -14,13 +16,18 @@
         <div id="pdf-container">
             <canvas id="pdf-canvas"></canvas>
             <!--<div ng-show="activeFile.currentPage != activeFile.maxPage">-->
-            <i class="fa fa-2x fa-chevron-circle-left pdf-nav-button" aria-hidden="true"
+            <i class="fa fa-2x fa-chevron-circle-left pdf-nav-button pdf-nav-button-left" aria-hidden="true"
                ng-class="activeFile.currentPage == 1 && 'pdf-nav-button-disabled'"
                ng-click="pdfPrevPage()"></i>
 
-            <i class="fa fa-2x fa-chevron-circle-right pdf-nav-button" aria-hidden="true"
+            <i class="fa fa-2x fa-chevron-circle-right pdf-nav-button pdf-nav-button-right" aria-hidden="true"
                ng-class="activeFile.currentPage == activeFile.pdfDocument.numPages && 'pdf-nav-button-disabled'"
                ng-click="pdfNextPage()"></i>
+
+            <i class="fa fa-2x fa-file-pdf-o pdf-nav-button open-pdf-native" aria-hidden="true" ng-click="openPdfNative()"></i>
+
+            <i class="fa fa-2x fa-folder-open-o pdf-nav-button open-pdf-in-folder" aria-hidden="true" ng-click="openPdfInFolder()"></i>
+
             <!--</div>-->
         </div>
 
@@ -50,6 +57,9 @@
                 Variables:
                 <div class="variable" ng-click="alert('TODO')">- %{date}</div>
                 <div class="variable">- %{year}</div>
+            </div>
+            <div>
+                Target location: {{proposed.tag.dest}}/{{proposed.name}}.pdf
             </div>
 
             <button type="submit">Rename</button>

@@ -206,7 +206,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
         var originalTagStr = fileName.match(/(\[.*\])(.*)/);
         var tagStr = "";
         if (originalTagStr) {
-            var tagStr = originalTagStr[1].replace(/\[|\]/g, "").toLowerCase();
+            tagStr = originalTagStr[1].replace(/\[|\]/g, "").toLowerCase();
         }
         if (tagStr == "") {
             return null;
@@ -264,7 +264,10 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
             // try to determine the year that is mentioned in the pagetext to make a smart suggestion
             var foundYears = [];
             for (var year = 2008; year <= parseInt(new Date().getFullYear()); year++) {
-                if (pageText.indexOf(year) > -1) {
+                // also search for years that contains spaces like: 2 0 1 4
+                const strYear = year.toString();
+                const yearWithSpaces = " " + strYear[0] + " " + strYear[1] + " " + strYear[2] + " " + strYear[3];
+                if (pageText.indexOf(year) > -1 || pageText.indexOf(yearWithSpaces) > -1) {
                     foundYears.push(year);
                 }
             }
@@ -340,6 +343,15 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
                 renderPdfDocument(pdfDocument, file.currentPage, pageProccessor);
             });
         }
+    };
+
+    $scope.openPdfNative = function () {
+        ipcRenderer.send('open-external', "file://" + $scope.activeFile.path);
+    };
+
+
+    $scope.openPdfInFolder = function () {
+        ipcRenderer.send('open-item-in-folder', $scope.activeFile.path);
     };
 
 }]);

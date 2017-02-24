@@ -73,7 +73,14 @@ ipcMain.on('toggle-dev-tools', function (event, arg) {
 ipcMain.on('open-external', function (event, arg) {
     console.log("Opening", arg);
     shell.openExternal(arg);
+
 });
+
+ipcMain.on('open-item-in-folder', function (event, arg) {
+    console.log("Opening in folder", arg);
+    shell.showItemInFolder(arg);
+});
+
 
 ipcMain.on('show-main-window', function (event, arg) {
     // only make the window visible if it's not. This prevents us from refocussing the window when it's already
