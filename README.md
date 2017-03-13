@@ -1,6 +1,9 @@
 # Ralphy
-Simple image scan organizing tool written in NodeJS using electron.
-Mainly for personal use, no intention to make this distributable or production-quality at this point.
+Simple image scan organizing tool written in NodeJS using electron. Mainly for personal use,
+no intention to make this distributable or production-quality at this point.
+Ralphy works together with a google apps script (see ```google-apps/Code.gs```) that does
+automatic file moving based on filename conventions applied by ralphy.
+
 
 To get started:
 ```bash
@@ -28,6 +31,6 @@ Ralphy development is just getting started. Some of the things we'd like:
 - Sass
 - Unit and Integration tests
 - Bugfix: support slashes in tags
-- Links to Google drive and local watch directory
 - Notifications on new log entries
 - Auto-complete tags
+- Simple PDF modification: rotate, merge
