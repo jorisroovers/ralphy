@@ -3,8 +3,9 @@ const fs = require('fs');
 const storage = require('electron-json-storage');
 const path = require('path');
 const chokidar = require('chokidar');
-// http://mozilla.github.io/pdf.js/examples/learning/helloworld.html
-const pdf = require('pdfjs-dist');
+const hummus = require('hummus');
+const pdf = require('pdfjs-dist'); // http://mozilla.github.io/pdf.js/examples/learning/helloworld.html
+
 
 PDFJS.workerSrc = '../../node_modules/pdfjs-dist/build/pdf.worker.js';
 
@@ -329,9 +330,10 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
         });
     };
 
-    renderPdf = function (file, pageProccessor) {
+    renderPdf = function (file, pageProccessor, forceReload) {
+        forceReload = (typeof forceReload !== 'undefined') ? forceReload : false;
         // if we've read the pdf document before, just reuse it, otherwise load it first.
-        if (file.pdfDocument != null) {
+        if (!forceReload && file.pdfDocument != null) {
             renderPdfDocument(file.pdfDocument, file.currentPage, pageProccessor);
         } else {
             var data = new Uint8Array(fs.readFileSync(file.path));
@@ -353,5 +355,50 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
     $scope.openPdfInFolder = function () {
         ipcRenderer.send('open-item-in-folder', $scope.activeFile.path);
     };
+
+    $scope.rotatePageRight = function () {
+
+        // Life-saver: https://github.com/galkahana/HummusJS/issues/59
+        var pageIndexToChange = $scope.activeFile.currentPage - 1;
+
+        var pdfWriter = hummus.createWriterToModify($scope.activeFile.path, {modifiedFilePath: $scope.activeFile.path});
+
+        var copyingContext = pdfWriter.createPDFCopyingContextForModifiedFile();
+        var parser = copyingContext.getSourceDocumentParser();
+        var pageObjectID = parser.getPageObjectID(pageIndexToChange);
+        var page = parser.parsePage(pageIndexToChange);
+        var pageJSObject = page.getDictionary().toJSObject();
+
+        // in case the prior rotation is needed to calculate the new rotation, as it was in my case, it's available here:
+        var oldRotation = page.getRotate();
+        var desiredRotation = (oldRotation + 90) % 360;
+
+        // create a new version of the page object
+        var objectsContext = pdfWriter.getObjectsContext();
+        objectsContext.startModifiedIndirectObject(pageObjectID);
+        var modifiedPageObject = pdfWriter.getObjectsContext().startDictionary();
+
+        // copy all but Rotate elements
+        Object.getOwnPropertyNames(pageJSObject).forEach(function (element, index, array) {
+            if (element != 'Rotate') {
+                modifiedPageObject.writeKey(element);
+                copyingContext.copyDirectObjectAsIs(pageJSObject[element]);
+            }
+        });
+
+        // setup new rotate and finish object
+        modifiedPageObject.writeKey('Rotate');
+        objectsContext
+            .writeNumber(desiredRotation)
+            .endLine()
+            .endDictionary(modifiedPageObject)
+            .endIndirectObject();
+
+        pdfWriter.end();
+
+        renderPdf($scope.activeFile, suggestMetadata, true);
+
+    };
+
 
 }]);

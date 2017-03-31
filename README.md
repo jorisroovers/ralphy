@@ -9,6 +9,10 @@ To get started:
 ```bash
 cd ralphy
 npm install
+# Rebuild node modules, see here:
+# http://stackoverflow.com/questions/42616008/node-module-version-conflict-when-installing-modules-for-electron
+# https://github.com/electron/electron-rebuild
+node_modules/.bin/electron-rebuild
 npm start
 ```
 

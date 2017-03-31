@@ -20,12 +20,14 @@
   },
   "homepage": "https://github.com/ralphy/jorisroovers",
   "devDependencies": {
-    "electron": "^1.4.15"
+    "electron": "^1.4.15",
+    "electron-rebuild": "^1.5.7"
   },
   "dependencies": {
     "chokidar": "^1.6.1",
     "electron": "^1.4.15",
     "electron-json-storage": "^3.0.1",
+    "hummus": "^1.0.75",
     "pdfjs-dist": "^1.7.312"
   }
 }
