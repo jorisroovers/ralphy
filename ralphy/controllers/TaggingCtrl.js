@@ -6,6 +6,7 @@ const chokidar = require('chokidar');
 const hummus = require('hummus');
 const pdf = require('pdfjs-dist'); // http://mozilla.github.io/pdf.js/examples/learning/helloworld.html
 
+const settings = require("../common/Settings").settings;
 
 PDFJS.workerSrc = '../../node_modules/pdfjs-dist/build/pdf.worker.js';
 
@@ -21,30 +22,29 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
     // the tag that is active, i.e. being edited
     $scope.activeTag = null;
 
-    var settings = {};
+    $scope.settings = null;
 
     var init = function () {
-        var deferred = $q.defer();
-        storage.get('settings.user', function (error, data) {
-            settings = data;
-            deferred.resolve();
+        var promise = settings.load();
+        promise.then(function () {
+            $scope.settings = settings.settings;
         });
-        return deferred.promise;
+        return promise;
     };
 
     readFiles = function () {
         // first, let's reread the configfile as this can influence what we do next
         readConfigFile();
 
-        files = fs.readdirSync(settings.watchDirectory);
+        files = fs.readdirSync($scope.settings.watchDirectory);
         // Only show pdf files (for now we just say a file is a PDF if it has the .pdf extension).
         files = files.filter(function (file) {
             return /\.pdf$/.test(file);
         });
 
         files.sort(function (a, b) {
-            var fileAPath = path.join(settings.watchDirectory, a);
-            var fileBPath = path.join(settings.watchDirectory, b);
+            var fileAPath = path.join($scope.settings.watchDirectory, a);
+            var fileBPath = path.join($scope.settings.watchDirectory, b);
             return fs.statSync(fileBPath).mtime.getTime() - fs.statSync(fileAPath).mtime.getTime();
         });
 
@@ -67,7 +67,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
      * Read the ralphy configuration file and extract settings, tags, etc from it.
      **/
     readConfigFile = function () {
-        var configFilePath = path.join(settings.watchDirectory, settings.googleDriveConfigFile);
+        var configFilePath = path.join($scope.settings.watchDirectory, $scope.settings.googleDriveConfigFile);
         var config = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
         angular.forEach(config.tags, function (obj, key) {
             var tagData = {tag: key, displayName: key};
@@ -77,7 +77,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
     };
 
     watchScansDirectory = function () {
-        var pdfGlob = path.join(settings.watchDirectory, "*.pdf");
+        var pdfGlob = path.join($scope.settings.watchDirectory, "*.pdf");
         var watcher = chokidar.watch(pdfGlob, {ignoreInitial: true});
         watcher.on('all', function (event, file) {
             $scope.$apply(function () {
@@ -128,11 +128,11 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
     };
 
     $scope.activate = function (fileName) {
-        var filePath = path.join(settings.watchDirectory, fileName);
+        var filePath = path.join($scope.settings.watchDirectory, fileName);
 
         $scope.activeFile = {
             path: filePath,
-            dirPath: settings.watchDirectory,
+            dirPath: $scope.settings.watchDirectory,
             name: fileName,
             currentPage: 1,
             pdfDocument: null,
@@ -176,7 +176,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
     };
 
     $scope.saveTags = function () {
-        var configFilePath = path.join(settings.watchDirectory, settings.googleDriveConfigFile);
+        var configFilePath = path.join($scope.settings.watchDirectory, $scope.settings.googleDriveConfigFile);
         var config = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
 
         // only save the tags that we know, i.e. those that we previously loaded from file.

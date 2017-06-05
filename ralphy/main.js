@@ -73,12 +73,16 @@ ipcMain.on('toggle-dev-tools', function (event, arg) {
 ipcMain.on('open-external', function (event, arg) {
     console.log("Opening", arg);
     shell.openExternal(arg);
-
 });
 
 ipcMain.on('open-item-in-folder', function (event, arg) {
     console.log("Opening in folder", arg);
     shell.showItemInFolder(arg);
+});
+
+ipcMain.on('open-dialog', function (event, id, options) {
+    const result = electron.dialog.showOpenDialog(options);
+    event.sender.send('open-dialog-result', id, result);
 });
 
 

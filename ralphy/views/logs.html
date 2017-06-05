@@ -1,7 +1,11 @@
 <h1>LOGS</h1>
-Last run: {{log.lastRun}}
 
-<div id="logs-container">
+<div ng-hide="log" class="first-use-message">
+    Seems like you don't have any logs yet. <br/>Have you <a href="#/settings">configured</a> Ralphy already?
+</div>
+
+<div id="logs-container" ng-show="log">
+    Last run: {{log.lastRun}}
     <table id="logs">
         <tr>
             <th>Action</th>
