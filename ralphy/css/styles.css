@@ -14,7 +14,16 @@ body, html {
     font-size: 26px;
     text-align: center;
     margin-top: 25%;
+}
 
+.page-title {
+    /*background-color: #b5d4ee;*/
+    background-color: #77A6C8;
+    color: #fff;
+    margin: -5px -5px 10px -5px; /* -5px margins to offset view padding */
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+    font-weight: 300;
 }
 
 /* Nav and View */

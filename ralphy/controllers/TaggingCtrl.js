@@ -258,8 +258,10 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
             const regex = /((onderwerp|betreft)(:|;)?\s)(.*)/i;
             const matches = pageText.match(regex);
             if (matches) {
-                $scope.activeFile.suggestedFilenames.push(matches[4]);
-                console.log("SUGGESTED FILENAME:", matches[4]);
+                // drop punctuation and whitespace from beginning and end of title
+                var title = matches[4].replace(/(\.|:|;|!|\s|\?)*$/, "").replace(/^(\.|:|;|!|\s|\?)*/, "");
+                $scope.activeFile.suggestedFilenames.push(title);
+                console.log("SUGGESTED FILENAME:", title);
             }
 
             // try to determine the year that is mentioned in the pagetext to make a smart suggestion

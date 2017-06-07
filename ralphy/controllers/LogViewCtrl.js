@@ -22,7 +22,9 @@ angular.module('ralphy').controller('LogViewController', ['$scope', '$q', functi
     var readLogs = function () {
         var logFilePath = path.join($scope.settings.watchDirectory, $scope.settings.googleDriveLogFile);
         var log = JSON.parse(fs.readFileSync(logFilePath, 'utf8'));
-        $scope.log = log;
+        $scope.$apply(function () {
+            $scope.log = log;
+        });
     };
 
     $scope.openUrl = function (url) {

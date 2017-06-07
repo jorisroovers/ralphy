@@ -1,16 +1,16 @@
-<h1>LOGS</h1>
+<h1 class="page-title">&gt;&nbsp;Logs</h1>
 
-<div ng-hide="log" class="first-use-message">
+<div ng-show="settings.initialSetup" class="first-use-message">
     Seems like you don't have any logs yet. <br/>Have you <a href="#/settings">configured</a> Ralphy already?
 </div>
 
-<div id="logs-container" ng-show="log">
+<div id="logs-container" ng-hide="settings.initialSetup">
     Last run: {{log.lastRun}}
     <table id="logs">
         <tr>
             <th>Action</th>
             <th>Date</th>
-            <th>Original Name</th>
+            <th>Original Name</th>f
             <th>Destination</th>
         </tr>
         <tr ng-repeat="logEntry in log.logs | orderBy: '-created'" ng-class="logEntry.debug ? 'debug': ''">
