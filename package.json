@@ -4,7 +4,8 @@
   "description": "A simple image scan utility",
   "main": "ralphy/main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -21,7 +22,8 @@
   "homepage": "https://github.com/ralphy/jorisroovers",
   "devDependencies": {
     "electron": "^1.4.15",
-    "electron-rebuild": "^1.5.7"
+    "electron-rebuild": "^1.5.7",
+    "jest": "^20.0.4"
   },
   "dependencies": {
     "chokidar": "^1.6.1",

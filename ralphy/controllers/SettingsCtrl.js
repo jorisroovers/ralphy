@@ -22,13 +22,15 @@ angular.module('ralphy').controller('SettingsController', ['$scope', '$timeout',
 
     $scope.reset = function () {
         settings.reset().then(function () {
-            $scope.$apply(function () {
-                $scope.userSettings = settings.settings;
-                $scope.statusMessage = "Reset to defaults";
+            settings.load().then(function () {
+                $scope.$apply(function () {
+                    $scope.userSettings = settings.settings;
+                    $scope.statusMessage = "Reset to defaults";
+                });
+                $timeout(function () {
+                    $scope.statusMessage = "";
+                }, 1000);
             });
-            $timeout(function () {
-                $scope.statusMessage = "";
-            }, 1000);
         });
     };
 

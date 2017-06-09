@@ -14,7 +14,7 @@ function Settings() {
         "googleDriveConfigFile": "ralphy-config.json"
     };
 
-    var STORAGE_KEY = 'settings.user';
+    self.STORAGE_KEY = 'settings.user';
 
     self.settings = {};
 
@@ -22,7 +22,7 @@ function Settings() {
         // let's use ES6 native promises:
         // https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
         var promise = new Promise(function (resolve) {
-            storage.get(STORAGE_KEY, function (error, data) {
+            storage.get(self.STORAGE_KEY, function (error, data) {
                 if (error) throw error;
                 if (Object.keys(data).length === 0) {
                     // deepcopy: https://stackoverflow.com/questions/6089058/nodejs-how-to-clone-a-object
@@ -35,16 +35,21 @@ function Settings() {
         return promise;
     };
 
-    self.save = function (newSettings) {
-        self.settings.initialSetup = false; // Since we're saving, it's not the intialSetup anymore
-        storage.set(STORAGE_KEY, self.settings);
+    self.save = function () {
+        var promise = new Promise(function (resolve) {
+            self.settings.initialSetup = false; // Since we're saving, it's not the intialSetup anymore
+            storage.set(self.STORAGE_KEY, self.settings, function () {
+                resolve();
+            });
+        });
+        return promise;
     };
 
     self.reset = function () {
         var promise = new Promise(function (resolve) {
-            storage.clear(function () {
+            storage.remove(self.STORAGE_KEY, function () {
                 // deepcopy: https://stackoverflow.com/questions/6089058/nodejs-how-to-clone-a-object
-                self.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+                self.settings = {};
                 resolve();
             });
         });

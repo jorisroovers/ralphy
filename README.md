@@ -1,4 +1,6 @@
 # Ralphy
+[![Build Status](https://travis-ci.org/jorisroovers/ralphy.svg?branch=master)](https://travis-ci.org/jorisroovers/ralphy)
+
 Simple image scan organizing tool written in NodeJS using electron. Mainly for personal use,
 no intention to make this distributable or production-quality at this point.
 Ralphy works together with a google apps script (see ```google-apps/Code.gs```) that does
