@@ -78,11 +78,11 @@
         </div>
 
     </div>
-
     <div id="all-tags" class="tag-group">
-        <div ng-repeat="(tag,tagObj) in tags" class="tag" ng-class="tagObj.unknown && 'unknown-tag'">
+        <div ng-repeat="tagObj in tags | values | orderBy: 'tag'" class="tag"
+             ng-class="tagObj.unknown && 'unknown-tag'">
             <div ng-click="applyTag(tagObj)">
-                {{tag}}
+                {{tagObj.tag}}
             </div>
             <i class="fa fa-cog edit-tag" aria-hidden="true" ng-click="editTag(tagObj)"></i>
         </div>

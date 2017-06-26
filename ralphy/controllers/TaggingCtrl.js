@@ -96,7 +96,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
     $scope.changeName = function () {
         // only apply tag if there is one
         var newName = $scope.proposed.name;
-        if ($scope.proposed.tag.tag.trim() != "") {
+        if ($scope.proposed.tag != null && $scope.proposed.tag.tag.trim() != "") {
             newName = "[" + $scope.proposed.tag.tag.toLowerCase() + "] " + $scope.proposed.name;
         }
         // add .pdf extension if it's not part of the filename yet
@@ -260,6 +260,8 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
             if (matches) {
                 // drop punctuation and whitespace from beginning and end of title
                 var title = matches[4].replace(/(\.|:|;|!|\s|\?)*$/, "").replace(/^(\.|:|;|!|\s|\?)*/, "");
+                // replace slashes with dashes (no slashes allowed in filenames)
+                title = title.replace("/", "-");
                 $scope.activeFile.suggestedFilenames.push(title);
                 console.log("SUGGESTED FILENAME:", title);
             }
@@ -275,6 +277,8 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
                 }
             }
             console.log("FOUND YEARS:", foundYears);
+
+            // TODO: try http://fusejs.io/
 
             // try to determine the tag from the text
             $scope.$apply(function () {

@@ -44,8 +44,16 @@ angular.module('ralphy', ['ngRoute'])
             }
         };
     })
-    .config(function ($routeProvider) {
+    .filter('values', function () {
+        // Simple filter to just get the values of an object in an angular view
+        // This allows for applying additional array filters after it (like sorting)
+        return function (input) {
+            if (!angular.isObject(input)) return input;
 
+            return Object.values(input);
+        }
+    })
+    .config(function ($routeProvider) {
         $routeProvider
             .when('/', {
                 controller: 'TaggingController as taggingCtrl',

@@ -39,4 +39,5 @@ Ralphy development is just getting started. Some of the things we'd like:
 - Bugfix: support slashes in tags
 - Notifications on new log entries
 - Auto-complete tags
-- Simple PDF modification: rotate, merge
+- Simple PDF modification: delete pages, merge
+- Fuzzy tag matching using http://fusejs.io/ or similar library
