@@ -22,6 +22,11 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
     // the tag that is active, i.e. being edited
     $scope.activeTag = null;
 
+    // whether we're showing the merge file selector dialog or not
+    $scope.mergeSelectorActive = false;
+
+    $scope.mergeSelectedFile = null;
+
     $scope.settings = null;
 
     var init = function () {
@@ -51,16 +56,36 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
         // convert the files to proper objects that have extra metadata
         var fileObjs = [];
         angular.forEach(files, function (fileName) {
-            var tagObj = getTagFromFileName(fileName);
-            var fileObj = {name: fileName, tag: tagObj, nameTagless: stripTag(fileName, tagObj)};
-            fileObjs.push(fileObj);
+            fileObjs.push(createFileObj(fileName));
         });
         $scope.files = fileObjs;
 
-        // make the first file active if no file is active yet
-        if ($scope.files.length > 0 && $scope.activeFile == null) {
-            $scope.activate($scope.files[0].name);
+        // Intelligently decide what file to make active
+        if ($scope.files.length > 0){
+            // make  the first file active if no file is active yet or if the currently active file no longer exists
+            if ($scope.activeFile == null || (!fs.existsSync($scope.activeFile.path))) {
+                $scope.activate($scope.files[0].name);
+            }
         }
+    };
+
+    /**
+     * Given a filename, create a fileObj with a bunch of meta-info.
+     */
+    createFileObj = function(fileName){
+        let filePath = path.join($scope.settings.watchDirectory, fileName);
+        let tagObj = getTagFromFileName(fileName);
+        return fileObj =  {
+            path: filePath,
+            dirPath: $scope.settings.watchDirectory,
+            name: fileName,
+            nameTagless: stripTag(fileName, tagObj),
+            currentPage: 1,
+            pdfDocument: null,
+            tag: tagObj,
+            suggestedTags: {},
+            suggestedFilenames: []
+        };
     };
 
     /**
@@ -128,21 +153,9 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
     };
 
     $scope.activate = function (fileName) {
-        var filePath = path.join($scope.settings.watchDirectory, fileName);
 
-        $scope.activeFile = {
-            path: filePath,
-            dirPath: $scope.settings.watchDirectory,
-            name: fileName,
-            currentPage: 1,
-            pdfDocument: null,
-            tag: getTagFromFileName(fileName),
-            suggestedTags: {},
-            suggestedFilenames: []
-        };
-
-        var proposedName = stripTag($scope.activeFile.name, $scope.activeFile.tag)
-        proposedName = proposedName.replace(/\.pdf$/, "");
+        $scope.activeFile =  createFileObj(fileName);
+        let proposedName = $scope.activeFile.nameTagless.replace(/\.pdf$/, "");
 
         $scope.proposed = {
             name: proposedName,
@@ -262,8 +275,10 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
                 var title = matches[4].replace(/(\.|:|;|!|\s|\?)*$/, "").replace(/^(\.|:|;|!|\s|\?)*/, "");
                 // replace slashes with dashes (no slashes allowed in filenames)
                 title = title.replace("/", "-");
-                $scope.activeFile.suggestedFilenames.push(title);
-                console.log("SUGGESTED FILENAME:", title);
+                if (title != "") {
+                    $scope.activeFile.suggestedFilenames.push(title);
+                    console.log("SUGGESTED FILENAME: '%s'", title);
+                }
             }
 
             // try to determine the year that is mentioned in the pagetext to make a smart suggestion
@@ -436,8 +451,27 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
 
     };
 
-    $scope.mergePdfs = function () {
-        console.log("Merge PDFs: TODO");
+    $scope.deletePdf = function () {
+        fs.unlink($scope.activeFile.path);
+    };
+
+    $scope.showPdfChooser = function () {
+        $scope.mergeSelectorActive = true;
+    };
+
+    $scope.selectPdf = function(selectedPdf){
+        $scope.mergeSelectedFile = selectedPdf;
+    };
+
+    $scope.appendPdf = function () {
+        console.log($scope.mergeSelectedFile);
+        var pdfWriter = hummus.createWriterToModify($scope.activeFile.path, {modifiedFilePath: $scope.activeFile.path});
+        pdfWriter.appendPDFPagesFromPDF($scope.mergeSelectedFile.path);
+        pdfWriter.end();
+
+        $scope.mergeSelectedFile = null;
+        $scope.mergeSelectorActive = false;
+        renderPdf($scope.activeFile, suggestMetadata, true);
     };
 
 

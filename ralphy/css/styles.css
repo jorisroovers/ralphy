@@ -3,7 +3,8 @@ html * {
     /*overflow-y: hidden; !* get rid of weird vertical scrollbar in main window *!*/
 }
 
-body, html {
+body,
+html {
     height: 100%;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 13px;
@@ -20,11 +21,13 @@ body, html {
     /*background-color: #b5d4ee;*/
     background-color: #77A6C8;
     color: #fff;
-    margin: -5px -5px 10px -5px; /* -5px margins to offset view padding */
+    margin: -5px -5px 10px -5px;
+    /* -5px margins to offset view padding */
     padding: 5px;
     border-bottom: 1px solid #ccc;
     font-weight: 300;
 }
+
 
 /* Nav and View */
 
@@ -67,6 +70,7 @@ body, html {
     width: calc(100% - 60px);
 }
 
+
 /* Variable */
 
 .variable-group .variable {
@@ -83,6 +87,7 @@ body, html {
     color: red;
 }
 
+
 /* Suggested filename */
 
 .suggested-filename:hover {
@@ -97,13 +102,15 @@ body, html {
     background-color: #ffe14a;
 }
 
+
 /* Tagging */
 
 #all-tags {
     border-top: 1px solid #bbbbbb;
 }
 
-.tag-group, .variable-group {
+.tag-group,
+.variable-group {
     content: " ";
     clear: both;
     display: block;
@@ -144,37 +151,47 @@ body, html {
     width: 600px;
 }
 
+
 /* File browser */
 
-#file-browser:after {
+#file-browser:after, #merge-selector:after {
     content: " ";
     clear: both;
     display: block;
 }
 
-#file-browser tbody {
+#file-browser tbody, #merge-selector tbody {
     display: block;
     height: 480px;
     overflow-y: scroll;
     overflow-x: hidden;
 }
 
-#file-list {
+#merge-selector {
+    position: absolute;
+    background: #fff;
+    width: calc(100% - 60px);
+    height: 100%;
+    z-index: 10;
+    margin: auto;
+}
+
+.file-list {
     float: left;
     border-collapse: collapse;
     width: 50%;
 }
 
-#file-list .file {
+.file-list .file {
     margin: 10px 0;
 }
 
-#file-list .tag-column {
+.file-list .tag-column {
     text-align: right;
     height: 18px;
 }
 
-#file-list .tag {
+.file-list .tag {
     display: inline;
     background-color: orange;
     padding: 3px;
@@ -183,7 +200,7 @@ body, html {
     font-size: 0.7rem;
 }
 
-#file-list .no-tag {
+.file-list .no-tag {
     display: inline;
     background-color: #eee;
     padding: 3px;
@@ -192,11 +209,11 @@ body, html {
     font-size: 0.7rem;
 }
 
-#file-list .filename-column:hover {
+.file-list .filename-column:hover {
     cursor: pointer;
 }
 
-#file-list tr.activeFile td {
+.file-list tr.activeFile td {
     color: white;
     background: #178ac8;
 }
@@ -206,10 +223,12 @@ body, html {
     width: 50%;
 }
 
+
 /* Proposed File */
 
 #proposed-container {
-    font-size: 0; /* No spacing between spans */
+    font-size: 0;
+    /* No spacing between spans */
 }
 
 #proposed-filename {
@@ -233,7 +252,8 @@ body, html {
     margin-right: 0.4rem;
 }
 
-#proposed-tag:focus, #proposed-name:focus {
+#proposed-tag:focus,
+#proposed-name:focus {
     outline: none;
 }
 
@@ -241,18 +261,23 @@ body, html {
     font-size: 1.5rem;
 }
 
+
 /* PDF rendering */
 
 #pdf-canvas {
-    /*width: 360px;*/
-    height: 480px;
-    border: 1px solid #bbb;
-    padding: 2px;
+    max-width: 340px;
+    max-height: 480px;
 }
 
 #pdf-container {
+    width: 340px;
+    height: 480px;
+    line-height: 480px;
     position: relative;
     display: inline-block;
+    border: 1px solid #bbb;
+    padding: 2px;
+    vertical-align: middle;
 }
 
 .pdf-nav-button {
@@ -283,8 +308,12 @@ body, html {
     right: 10px;
 }
 
+.delete-pdf {
+    right: 80px;
+}
+
 .open-pdf-in-folder {
-    right: 50px;
+    right: 40px;
 }
 
 .rotate-page {
@@ -292,7 +321,11 @@ body, html {
 }
 
 .delete-page {
-    left: 50px;
+    left: 40px;
+}
+
+.append-pages {
+    left: 70px;
 }
 
 
@@ -307,6 +340,7 @@ label {
     text-align: right;
     display: inline-block;
 }
+
 
 /* Logs */
 
