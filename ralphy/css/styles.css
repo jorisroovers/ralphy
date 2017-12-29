@@ -287,6 +287,15 @@ body, html {
     right: 50px;
 }
 
+.rotate-page {
+    left: 10px;
+}
+
+.delete-page {
+    left: 50px;
+}
+
+
 /* Settings */
 
 .form-group {

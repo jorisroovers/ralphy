@@ -37,7 +37,13 @@
 
                 <i class="fa fa-2x fa-folder-open-o pdf-nav-button open-pdf-in-folder" aria-hidden="true"
                    ng-click="openPdfInFolder()"></i>
-                <i class="fa fa-2x fa-rotate-right pdf-nav-button" aria-hidden="true" ng-click="rotatePageRight()"></i>
+
+                <i class="fa fa-2x fa-rotate-right pdf-nav-button rotate-page" aria-hidden="true" ng-click="rotatePageRight()"></i>
+
+                <span class="fa-stack pdf-nav-button delete-page" aria-hidden="true" ng-click="deletePage()">
+                    <i class="fa fa-file-o fa-stack-2x"></i>
+                    <i class="fa fa-trash fa-stack-1x"></i>
+                </span>
 
                 <!--</div>-->
             </div>

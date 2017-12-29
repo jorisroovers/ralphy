@@ -6,7 +6,7 @@ var DEBUG = true;
 
 var CONFIG = {tags: {}};
 
-var SCANS_FOLDER_NAME = "/Scans";
+var SCANS_FOLDER_NAME = "/Administration/Scans";
 var LOGFILE_PATH = "ralphy-automove-log.json";
 var CONFIGFILE = "ralphy-config.json";
 

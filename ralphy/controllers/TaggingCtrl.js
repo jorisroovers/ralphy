@@ -406,5 +406,39 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
 
     };
 
+    $scope.deletePage = function () {
+
+        let pageIndexToDelete = $scope.activeFile.currentPage - 1;
+        let tmpFilename = "/tmp/ralphy-tmp-file.pdf";
+        let pdfWriter = hummus.createWriter(tmpFilename);
+
+        // Delete page by copying all but the selected page into a temp pdf and then renaming the temp pdf to
+        // the current pdf
+        for (let i=0; i < $scope.activeFile.pdfDocument.numPages; i++){
+            if (i == pageIndexToDelete) continue;
+            pdfWriter.appendPDFPagesFromPDF($scope.activeFile.path,
+                                            {type: hummus.eRangeTypeSpecific, specificRanges:[[i,i]]});
+        }
+
+        pdfWriter.end();
+        console.log("Written new file to %s with deleted page %s", tmpFilename, pageIndexToDelete);
+
+        // The renaming part
+        fs.rename(tmpFilename, $scope.activeFile.path, function(){
+            console.log("Moved %s to %s", tmpFilename, $scope.activeFile.path);
+
+            // Since we just deleted a page, we need to make sure to put the current page one back in case we deleted
+            // the last page
+            $scope.activeFile.currentPage = Math.min($scope.activeFile.currentPage, $scope.activeFile.pdfDocument.numPages - 1);
+            renderPdf($scope.activeFile, suggestMetadata, true);
+        });
+
+
+    };
+
+    $scope.mergePdfs = function () {
+        console.log("Merge PDFs: TODO");
+    };
+
 
 }]);
