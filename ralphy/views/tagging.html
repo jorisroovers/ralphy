@@ -22,6 +22,7 @@
         </table>
         <button ng-click="mergeSelectedFile = null; mergeSelectorActive = false;">Cancel</button>
         <button ng-click="appendPdf(mergeSelectedFile)" ng-disabled="mergeSelectedFile == null" >Append</button>
+        <input type="checkbox" ng-model="mergeSelector.deleteMerged"> Delete Merged PDF
     </div>
 
 
@@ -44,6 +45,10 @@
                 <!--<div ng-show="activeFile.currentPage != activeFile.maxPage">-->
                 <i class="fa fa-2x fa-chevron-circle-left pdf-nav-button pdf-nav-button-left" aria-hidden="true" ng-class="activeFile.currentPage == 1 && 'pdf-nav-button-disabled'"
                     ng-click="pdfPrevPage()"></i>
+
+                <span class="pdf-page-count current-page-nr">{{activeFile.currentPage}}</span>
+                <span class="pdf-page-count page-divider">/</span>
+                <span class="pdf-page-count total-page-nr">{{activeFile.pdfDocument.numPages}}</span>
 
                 <i class="fa fa-2x fa-chevron-circle-right pdf-nav-button pdf-nav-button-right" aria-hidden="true" ng-class="activeFile.currentPage == activeFile.pdfDocument.numPages && 'pdf-nav-button-disabled'"
                     ng-click="pdfNextPage()"></i>

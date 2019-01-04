@@ -286,12 +286,34 @@ html {
     bottom: 10px;
 }
 
+
 .pdf-nav-button-right {
-    left: calc(50%);
+    left: calc(50% + 30px);
 }
 
 .pdf-nav-button-left {
-    left: calc(50% - 40px);
+    left: calc(50% - 50px);
+}
+
+.pdf-page-count {
+    position: absolute;
+    bottom: 10px;
+    color: rgba(0, 0, 0, 0.4);
+    height: 25px;
+    line-height: 25px;
+    text-align: center;
+}
+
+.current-page-nr {
+    left: calc(50% - 20px);
+}
+
+.page-divider {
+    left: calc(50%);
+}
+
+.total-page-nr{
+    left: calc(50% + 10px);
 }
 
 .pdf-nav-button:hover {
