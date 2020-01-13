@@ -11,7 +11,13 @@ let mainWindow;
 function createWindow() {
 
 
-    mainWindow = new BrowserWindow({width: 1000, height: 800});
+    mainWindow = new BrowserWindow({
+        width: 1000,
+        height: 800,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
     mainWindow.loadURL(`file://${__dirname}/views/index.html`);
 
     // We can access settings here like this:
@@ -105,4 +111,3 @@ ipcMain.on('register-for-devtools-updates', function (event) {
     });
 
 });
-

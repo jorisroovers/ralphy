@@ -3,12 +3,14 @@ const fs = require('fs');
 const storage = require('electron-json-storage');
 const path = require('path');
 const chokidar = require('chokidar');
-const hummus = require('hummus');
-const pdf = require('pdfjs-dist'); // http://mozilla.github.io/pdf.js/examples/learning/helloworld.html
+
+const pdflib = require('pdf-lib');
+
+const pdfjsLib = require('pdfjs-dist'); // http://mozilla.github.io/pdf.js/examples/learning/helloworld.html
 
 const settings = require("../common/Settings").settings;
 
-PDFJS.workerSrc = '../../node_modules/pdfjs-dist/build/pdf.worker.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = '../../node_modules/pdfjs-dist/build/pdf.worker.js';
 
 
 angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filter', function ($scope, $q, $filter) {
@@ -289,7 +291,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
                 // replace slashes with dashes (no slashes allowed in filenames)
                 title = title.replace("/", "-");
                 if (title != "") {
-                    title = title.charAt(0).toUpperCase() + string.slice(1); // capitalize string
+                    title = title.charAt(0).toUpperCase() + title.slice(1); // capitalize string
                     $scope.activeFile.suggestedFilenames.push(title);
                     console.log("SUGGESTED FILENAME: '%s'", title);
                 }
@@ -372,7 +374,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
             renderPdfDocument(file.pdfDocument, file.currentPage, pageProccessor);
         } else {
             var data = new Uint8Array(fs.readFileSync(file.path));
-            PDFJS.getDocument(data).then(function (pdfDocument) {
+            pdfjsLib.getDocument(data).then(function (pdfDocument) {
                 // set the max page now that we know it
                 $scope.$apply(function () {
                     file.pdfDocument = pdfDocument;
@@ -391,88 +393,52 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
         ipcRenderer.send('open-item-in-folder', $scope.activeFile.path);
     };
 
-    $scope.rotatePageRight = function () {
+    $scope.rotatePageRight = async function () {
 
-        // Life-saver: https://github.com/galkahana/HummusJS/issues/59
+        // load pdf, read pages
+        const pdfBytes = fs.readFileSync($scope.activeFile.path);
+        const pdfDoc = await pdflib.PDFDocument.load(pdfBytes);
+        const pages = pdfDoc.getPages();
         var pageIndexToChange = $scope.activeFile.currentPage - 1;
 
-        var pdfWriter = hummus.createWriterToModify($scope.activeFile.path, {
-            modifiedFilePath: $scope.activeFile.path
-        });
-
-        var copyingContext = pdfWriter.createPDFCopyingContextForModifiedFile();
-        var parser = copyingContext.getSourceDocumentParser();
-        var pageObjectID = parser.getPageObjectID(pageIndexToChange);
-        var page = parser.parsePage(pageIndexToChange);
-        var pageJSObject = page.getDictionary().toJSObject();
-
-        // in case the prior rotation is needed to calculate the new rotation, as it was in my case, it's available here:
-        var oldRotation = page.getRotate();
+        // rotate
+        const oldRotation = pages[pageIndexToChange].getRotation().angle;
         var desiredRotation = (oldRotation + 90) % 360;
+        pages[pageIndexToChange].setRotation(pdflib.degrees(desiredRotation));
 
-        // create a new version of the page object
-        var objectsContext = pdfWriter.getObjectsContext();
-        objectsContext.startModifiedIndirectObject(pageObjectID);
-        var modifiedPageObject = pdfWriter.getObjectsContext().startDictionary();
-
-        // copy all but Rotate elements
-        Object.getOwnPropertyNames(pageJSObject).forEach(function (element, index, array) {
-            if (element != 'Rotate') {
-                modifiedPageObject.writeKey(element);
-                copyingContext.copyDirectObjectAsIs(pageJSObject[element]);
-            }
-        });
-
-        // setup new rotate and finish object
-        modifiedPageObject.writeKey('Rotate');
-        objectsContext
-            .writeNumber(desiredRotation)
-            .endLine()
-            .endDictionary(modifiedPageObject)
-            .endIndirectObject();
-
-        pdfWriter.end();
+        // save to file, reload pdf page
+        const modifiedPdfBytes = await pdfDoc.save()
+        fs.writeFileSync($scope.activeFile.path, modifiedPdfBytes);
 
         renderPdf($scope.activeFile, suggestMetadata, true);
 
     };
 
-    $scope.deletePage = function () {
+    $scope.deletePage = async function () {
 
+        // load pdf, read pages
+        const pdfBytes = fs.readFileSync($scope.activeFile.path);
+        const pdfDoc = await pdflib.PDFDocument.load(pdfBytes);
+
+        console.log("pages", pdfDoc.getPages());
+
+        // remove page
         let pageIndexToDelete = $scope.activeFile.currentPage - 1;
-        let tmpFilename = "/tmp/ralphy-tmp-file.pdf";
-        let pdfWriter = hummus.createWriter(tmpFilename);
+        pdfDoc.removePage(pageIndexToDelete);
 
-        // Delete page by copying all but the selected page into a temp pdf and then renaming the temp pdf to
-        // the current pdf
-        for (let i = 0; i < $scope.activeFile.pdfDocument.numPages; i++) {
-            if (i == pageIndexToDelete) continue;
-            pdfWriter.appendPDFPagesFromPDF($scope.activeFile.path, {
-                type: hummus.eRangeTypeSpecific,
-                specificRanges: [
-                    [i, i]
-                ]
-            });
-        }
+        // save to file, reload pdf page
+        const modifiedPdfBytes = await pdfDoc.save()
+        fs.writeFileSync($scope.activeFile.path, modifiedPdfBytes);
 
-        pdfWriter.end();
-        console.log("Written new file to %s with deleted page %s", tmpFilename, pageIndexToDelete);
-
-        // The renaming part
-        fs.rename(tmpFilename, $scope.activeFile.path, function () {
-            console.log("Moved %s to %s", tmpFilename, $scope.activeFile.path);
-
-            // Since we just deleted a page, we need to make sure to put the current page one back in case we deleted
-            // the last page
-            $scope.activeFile.currentPage = Math.min($scope.activeFile.currentPage, $scope.activeFile.pdfDocument.numPages - 1);
-            renderPdf($scope.activeFile, suggestMetadata, true);
-        });
-
+        // Since we just deleted a page, we need to make sure to put the current page one back in case we deleted
+        //  the last page
+        $scope.activeFile.currentPage = Math.min($scope.activeFile.currentPage, $scope.activeFile.pdfDocument.numPages - 1);
+        renderPdf($scope.activeFile, suggestMetadata, true);
 
     };
 
     $scope.deletePdf = function () {
-        fs.unlink($scope.activeFile.path);
+        fs.unlinkSync($scope.activeFile.path);
     };
 
     $scope.showPdfChooser = function () {
@@ -483,15 +449,37 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
         $scope.mergeSelectedFile = selectedPdf;
     };
 
-    $scope.appendPdf = function () {
-        var pdfWriter = hummus.createWriterToModify($scope.activeFile.path, {
-            modifiedFilePath: $scope.activeFile.path
+    $scope.appendPdf = async function () {
+        // var pdfWriter = hummus.createWriterToModify($scope.activeFile.path, {
+        //     modifiedFilePath: $scope.activeFile.path
+        // });
+        // pdfWriter.appendPDFPagesFromPDF($scope.mergeSelectedFile.path);
+        // pdfWriter.end();
+
+        // load both pdf
+        const targetPdfBytes = fs.readFileSync($scope.activeFile.path);
+        const targetPdfDoc = await pdflib.PDFDocument.load(targetPdfBytes);
+
+        const sourcePdfBytes = fs.readFileSync($scope.mergeSelectedFile.path);
+        const sourcePdfDoc = await pdflib.PDFDocument.load(sourcePdfBytes);
+
+        // copy pages
+        console.log(sourcePdfDoc.getPages().length);
+        // generate range() array: https://stackoverflow.com/a/10050831/381010
+        const pageNumbers = [...Array(sourcePdfDoc.getPages().length).keys()];
+        console.log("pages aarray", pageNumbers);
+        const copiedPages = await targetPdfDoc.copyPages(sourcePdfDoc, pageNumbers);
+        copiedPages.forEach(function (page) {
+            targetPdfDoc.addPage(page);
         });
-        pdfWriter.appendPDFPagesFromPDF($scope.mergeSelectedFile.path);
-        pdfWriter.end();
+
+        // save to file, reload pdf page
+        const modifiedPdfBytes = await targetPdfDoc.save()
+        fs.writeFileSync($scope.activeFile.path, modifiedPdfBytes);
+
 
         if ($scope.mergeSelector.deleteMerged) {
-            fs.unlink($scope.mergeSelectedFile.path);
+            fs.unlinkSync($scope.mergeSelectedFile.path);
         }
 
         $scope.mergeSelectedFile = null;

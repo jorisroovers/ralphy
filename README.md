@@ -18,6 +18,8 @@ node_modules/.bin/electron-rebuild
 npm start
 ```
 
+https://github.com/astefanutti/decktape/issues/201
+
 
 # Upgrading packages #
 
