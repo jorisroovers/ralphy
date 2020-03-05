@@ -113,7 +113,10 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
     watchScansDirectory = function () {
         var pdfGlob = path.join($scope.settings.watchDirectory, "*.pdf");
         var watcher = chokidar.watch(pdfGlob, {
-            ignoreInitial: true
+            ignoreInitial: true,
+            // In newer versions of chokidar, scanned PDFs in cloud synced folders added are
+            // not automatically detected without polling
+            usePolling: true 
         });
         watcher.on('all', function (event, file) {
             $scope.$apply(function () {
