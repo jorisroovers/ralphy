@@ -116,7 +116,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
             ignoreInitial: true,
             // In newer versions of chokidar, scanned PDFs in cloud synced folders added are
             // not automatically detected without polling
-            usePolling: true 
+            usePolling: true
         });
         watcher.on('all', function (event, file) {
             $scope.$apply(function () {
@@ -215,7 +215,7 @@ angular.module('ralphy').controller('TaggingController', ['$scope', '$q', '$filt
             }
         });
 
-        fs.writeFile(configFilePath, angular.toJson(config, 4), 'utf-8');
+    fs.writeFile(configFilePath, angular.toJson(config, 4), function (){ /* done callback */ });
     };
 
     $scope.deleteTag = function (tag) {
