@@ -15,7 +15,8 @@ function createWindow() {
         width: 1000,
         height: 800,
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            contextIsolation: false
         }
     });
     mainWindow.loadURL(`file://${__dirname}/views/index.html`);
