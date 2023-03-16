@@ -1,6 +1,8 @@
 const storage = require('electron-json-storage');
 // Use https://github.com/jviotti/electron-json-storage together with electron's remote
+const os = require('os');
 
+storage.setDataPath(os.homedir())
 
 function Settings() {
     var self = {};

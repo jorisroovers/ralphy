@@ -1,4 +1,4 @@
-const ipcRenderer = window.require("electron").ipcRenderer;
+// const ipcRenderer = window.require("electron").ipcRenderer;
 const fs = require('fs');
 const storage = require('electron-json-storage');
 const path = require('path');
@@ -8,7 +8,7 @@ const pdflib = require('pdf-lib');
 
 const pdfjsLib = require('pdfjs-dist'); // http://mozilla.github.io/pdf.js/examples/learning/helloworld.html
 
-const settings = require("../common/Settings").settings;
+// const settings = require("../common/Settings").settings;
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../node_modules/pdfjs-dist/build/pdf.worker.js';
 

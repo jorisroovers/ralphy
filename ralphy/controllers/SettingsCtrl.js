@@ -1,5 +1,5 @@
 const settings = require("../common/Settings").settings;
-const ipcRenderer = window.require("electron").ipcRenderer;
+// const ipcRenderer = window.require("electron").ipcRenderer;
 
 
 angular.module('ralphy').controller('SettingsController', ['$scope', '$timeout', function ($scope, $timeout) {

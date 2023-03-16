@@ -1,10 +1,10 @@
-const fs = require('fs');
-const storage = require('electron-json-storage');
-const path = require('path');
+// const fs = require('fs');
+// const storage = require('electron-json-storage');
+// const path = require('path');
 
-const ipcRenderer = window.require("electron").ipcRenderer;
+// const ipcRenderer = window.require("electron").ipcRenderer;
 
-const settings = require("../common/Settings").settings;
+// const settings = require("../common/Settings").settings;
 
 angular.module('ralphy').controller('LogViewController', ['$scope', '$q', function ($scope, $q) {
 

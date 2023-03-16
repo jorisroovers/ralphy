@@ -11,6 +11,11 @@ To get started:
 ```bash
 cd ralphy
 npm install
+npm start
+```
+
+It used to be required to use electron-rebuild, but as of 2023-03-16, that doesn't seem to be required anymore:
+```sh
 # Rebuild node modules, see here:
 # http://stackoverflow.com/questions/42616008/node-module-version-conflict-when-installing-modules-for-electron
 # https://github.com/electron/electron-rebuild

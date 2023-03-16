@@ -16,6 +16,7 @@ function createWindow() {
         height: 800,
         webPreferences: {
             nodeIntegration: true,
+            enableRemoteModule: true,
             contextIsolation: false
         }
     });
@@ -88,7 +89,7 @@ ipcMain.on('open-item-in-folder', function (event, arg) {
 });
 
 ipcMain.on('open-dialog', function (event, id, options) {
-    const result = electron.dialog.showOpenDialog(options);
+    const result = electron.dialog.showOpenDialogSync(options);
     event.sender.send('open-dialog-result', id, result);
 });
 
